@@ -1,0 +1,89 @@
+<!-- Mi primer captcha
+en el curso de Organización de Lenguajes y Compiladores 1
+-->
+<C_GcIC [id= "captcha_matematico_1"] [name= "Captcha Matemático 1"]>
+!! El encabezado de la página que tendrá mi captcha
+<C_hEAd>
+<C_LINK
+!! El link al que redirige mi captcha
+[href= "https://scontent.fgua3-2.fna.fbcdn.net/v/t1.6435-9/60347042_1212262572266566_3335110932194918400_n.jpg?_nc_cat=105&ccb=1-3&_nc_sid=a4a2d7&_nc_ohc=z4doWTNBJKIAX_Q92U-&_nc_ht=scontent.fgua3-2.fna&oh=f36885b58e3ecb2150b2f20869dec23c&oe=60BE5FCA"]>
+</C_LINK>
+!! El título de mi página
+<C_TITLE> Mi primer Captcha Matemático</C_TITLE>
+</C_hEAd>
+!! El cuerpo de la página
+<C_BODY [background= "#e5e6ea"] >
+!! un título simple estilizado
+<C_H1 [id= "title_1"] [text-align= "center"] [color= "#7eff33"] >
+Mi primer Captcha Matemático
+</C_H1>
+!! Un salto normal
+<br>
+!! Información de la operación a resolver en el captcha
+<C_SPAM [id= "mostrar_1"] [text-align= "center"] [color= "#3366ff"] >
+¿ Qué resultado genera la operación siguiente: 5+5 ?
+</C_SPAM>
+!! Input para la Respuesta del usuario generado con un scripting
+<C_SCRIPTING>
+ON_LOAD () [
+!!Estas instrucciones se ejecutan media vez se entra al scripting
+!! Insertamos el input con sus parámetros con la instrucción INSERT
+INSERT('<C_INPUT [type= "text"] [text-align= "center"]
+[id= "entrada_1"] >');
+INSERT('</C_INPUT>');
+]
+</C_SCRIPTING>
+!! Boton que llama a la funcionalidad calc
+<C_BUTTON [id= "boton_1"] [onclick= "PROCESS_calc()"] [background="green"]>
+Procesar...
+</C_BUTTON>
+!! Scripting para la función calc
+<C_SCRIPTING>
+PROCESS_calc() [
+!! Estas instrucciones no se ejecutan hasta llamar a PROCESS_calc()
+integer @global contador_fallas = 5;
+string result_caja_texto = getElemenById('entrada_1');
+string result = "10 ";
+string mensaje_fallo = "El captcha no fue validado intente otra vez ";
+string mensaje_acierto = "El captcha fue validado ";
+string mensaje_final = "El captcha no logró ser validado :( intente mas tarde";
+!! Validacion del numero de oportunidades restantes
+IF (contador_fallas = 0) THEN
+INIT {:
+ALERT_INFO(mensaje_final);
+EXIT();
+:} END
+!! Validación de fallas y aciertos
+IF (result_caja_texto == result ) THEN
+!!si el resultado es correcto
+INIT {:
+ALERT_INFO(mensaje_acierto);
+:} END
+ELSE
+!! si el intento es incorrecto
+
+INIT {:
+ALERT_INFO(mensaje_fallo);
+contador_fallas = contador_fallas -1;
+:} END
+]
+</C_SCRIPTING>
+</C_BODY>
+</C_GcIC>
+
+
+!!Fin de estructura GCIC
+
+"¿ Carmen//()000 "
+
+10%
+
+cols
+class
+rows
+id
+center
+left
+arial
+radio
+string

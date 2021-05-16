@@ -1,0 +1,495 @@
+
+//codigo java
+/*importar librerias o archivos utilizados*/
+package com.adolfo.analizadores;
+
+import java_cup.runtime.*;
+import java.util.List;
+import java.util.ArrayList;
+import com.adolfo.analizadores.Token;
+
+ parser code {:
+
+    //declaracion de variables
+
+
+    public Parser(Lexico lex) {
+        super(lex);
+    }
+
+
+//recuperacion de errroes
+    public void report_error(String message, Object info) {
+		System.out.println("reporterror");
+	}
+	public void report_fatal_error(String message, Object info) {
+		System.out.println("reportfatal");
+	}
+	public void report_fatal_error(Symbol cur) {
+		System.out.println("unrecovered_syntax_error");
+	}
+    
+    @Override
+    public void syntax_error(Symbol st) {
+       Token token = (Token) st.value;
+        //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
+
+      System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
+       // errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
+    }
+
+    protected int error_sync_size() {
+		return 1;
+	}
+
+
+ :}
+
+ /*simbolos terminales*/
+ terminal Token HTML ,HEAD, TITLE, LINK, BODY, SPAM, INPUT, TEXTAREA, 
+            SELECTED, OPTION, DIV, IMG, BR, BUTTON, H1, P, SCRIPT,
+            REFERENCIA, BACKGROUND, COLOR, FONTSZ, FONTFY, ALINGN,
+            TYPE, IDCM, NAME, COLUMNA, FILA, CLASE, SRC, WIDTH,	HEIGHT,
+            ALT, ONCLICK, ENTERO, DECIMAL, BOOLEANO, CHAR, STRING, GLOBAL,
+            IGUAL, MEQ, MAQ, OR, AND, NOT, SUMA, RESTA, PRODUCTO, DIVISION,
+            CORIN, COROUT, PARIN, PAROUT, COMA, PUNTOCOMA, LLAVEIN, LLAVEOUT,
+            DOSP, LOAD, ASCF, DESCF, LETPF, LETIMF, REVERSEF, CARALEF, NUMALEF,
+            ALERTF, EXIT, GETID, INSERT, INIT, END, IF, ELSE, REPEAT, HUNTIL,
+            THEN, WHILE, THENWHILE, COMILLA, APOSTROFO, PROCESOS, BOOLEANOS, ID,
+            NUMENTERO, NUMDECIMAL, CARACTER, HEXADECIMAL, CADENA; 
+
+
+ /*simbolos no terminales*/
+non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp_cadenatext, 
+            par_link, exp_links, parm_shisp, exp_opciones, parm_input, parm_image,
+            par_areatext, par_color, par_fontsize, par_heigtwith, par_button, par_body,
+            exp_proceso, contenido_div, par_div, exp_script, exp_funciones,
+            instrucciones, exp_variables, texto, mensaje_texto, instrucciones_if, condiciones,
+            condiciones_repeat, limit_repeat, instrucciones_intro, par_insert, par_insert1,
+            texto_etiqueta, exp_entero, exp_decimal, exp_char, exp_string, exp_boolean, dato_entero,
+            exp_opeinteger, dato_decimal, exp_oper_decimal, texto_insert, dat_char, 
+            dato_string, exp_oper_string, exp_funciones_especial, par_function_esp, dat_boolean,
+            exp_oper_bool, numeros, expr_numerica, signo_condicion, exp_condicion, oper_cond,
+            exp_conds;
+
+
+/* Producciones siendo A el inicial*/
+start with exp_ini;
+
+ exp_ini ::= MEQ HTML par_html exp_head  {:System.out.println("sintactico html");:}
+    | error exp_head    {:System.out.println("error html");:}
+    ;
+
+par_html ::= CORIN IDCM IGUAL COMILLA ID COMILLA COROUT par_html
+    | CORIN NAME IGUAL COMILLA exp_name COROUT par_html
+    | MAQ        {:System.out.println("sintactico parametros html");:}
+    ;
+
+exp_name ::= CADENA exp_name
+    | ID exp_name
+    | NUMENTERO exp_name
+    | NUMDECIMAL exp_name
+    | COMILLA
+    ;
+
+exp_head ::= MEQ HEAD MAQ par_head MEQ BODY par_body  exp_contenido   {:System.out.println("sintactico head");:}
+    | exp_script exp_head
+    | MEQ BODY par_body  exp_contenido  
+    ;
+
+
+par_head ::= MEQ TITLE MAQ exp_cadenatext  TITLE MAQ par_head
+    | MEQ LINK par_link MEQ DIVISION LINK MAQ par_head
+    | MEQ DIVISION HEAD MAQ
+    | exp_script par_head
+    ;
+
+par_body ::= CORIN BACKGROUND IGUAL COMILLA exp_links COROUT par_link
+    | MAQ
+    ;
+
+
+par_link ::= CORIN REFERENCIA IGUAL COMILLA exp_links COROUT par_link
+    | MAQ
+    ;
+
+exp_links ::= ID exp_links
+    | DOSP exp_links
+    | DIVISION exp_links
+    | CADENA exp_links
+    | IGUAL exp_links
+    | NUMENTERO exp_links
+    | AND exp_links
+    | NUMDECIMAL exp_links
+    | SUMA exp_links
+    | PRODUCTO exp_links
+    | RESTA exp_links
+    | HEXADECIMAL exp_links
+    | COMILLA
+    ;
+
+exp_contenido ::= MEQ SPAM parm_shisp exp_cadenatext  SPAM MAQ exp_contenido   {:System.out.println("contenido html");:}
+    | MEQ SELECTED parm_shisp exp_opciones  SELECTED MAQ exp_contenido
+    | MEQ H1 parm_shisp exp_cadenatext  H1 MAQ exp_contenido
+    | MEQ P parm_shisp exp_cadenatext  P MAQ exp_contenido
+    | MEQ BR MAQ exp_contenido
+    | MEQ INPUT parm_input exp_cadenatext  INPUT MAQ exp_contenido
+    | MEQ IMG parm_image MEQ DIVISION IMG MAQ exp_contenido
+    | MEQ TEXTAREA par_areatext TEXTAREA MAQ exp_contenido
+    | MEQ DIV par_div contenido_div DIV MAQ exp_contenido //falta contenido_div y par div
+    | MEQ BUTTON par_button  exp_cadenatext BUTTON MAQ exp_contenido //falta par_button
+    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ
+    | MEQ DIVISION HTML MAQ
+    | error exp_contenido            {:System.out.println("error html");:}
+    ;
+
+contenido_div ::= MEQ SPAM parm_shisp exp_cadenatext  SPAM MAQ contenido_div
+    | MEQ SELECTED parm_shisp exp_opciones  SELECTED MAQ contenido_div
+    | MEQ H1 parm_shisp exp_cadenatext  H1 MAQ contenido_div
+    | MEQ P parm_shisp exp_cadenatext  P MAQ contenido_div
+    | MEQ BR MAQ contenido_div
+    | MEQ INPUT parm_input exp_cadenatext  INPUT MAQ contenido_div
+    | MEQ IMG parm_image MEQ DIVISION IMG MAQ contenido_div
+    | MEQ TEXTAREA par_areatext TEXTAREA MAQ contenido_div
+    | MEQ BUTTON par_button  exp_cadenatext  BUTTON MAQ contenido_div //falta par_button
+    | MEQ DIVISION DIV MAQ 
+    ;
+
+par_div ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT par_div //fuera de style
+    | CORIN ALINGN IGUAL COMILLA ID COMILLA COROUT par_div
+    | CORIN COLOR IGUAL COMILLA par_color COMILLA COROUT par_div
+    | CORIN FONTFY IGUAL COMILLA ID COMILLA COROUT par_div
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize COMILLA COROUT par_div
+    | CORIN BACKGROUND IGUAL COMILLA exp_links COROUT par_div
+    | CORIN CLASE IGUAL COMILLA ID COROUT par_div
+    | MAQ
+    ;
+
+par_button ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT par_button //fuera de style
+    | CORIN ALINGN IGUAL COMILLA ID COMILLA COROUT par_button
+    | CORIN COLOR IGUAL COMILLA par_color COMILLA COROUT par_button
+    | CORIN FONTFY IGUAL COMILLA ID COMILLA COROUT par_button
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize COMILLA COROUT par_button
+    | CORIN BACKGROUND IGUAL COMILLA exp_links COROUT par_button
+    | CORIN ONCLICK IGUAL COMILLA exp_proceso COROUT par_button
+    | MAQ 
+    ;
+
+
+
+par_areatext ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT par_areatext //fuera de style
+    | CORIN COLUMNA IGUAL COMILLA NUMENTERO COMILLA COROUT par_areatext
+    | CORIN FILA IGUAL COMILLA NUMENTERO COMILLA COROUT par_areatext
+    | CORIN ALINGN IGUAL COMILLA ID COMILLA COROUT par_areatext
+    | CORIN FONTFY IGUAL COMILLA ID COMILLA COROUT par_areatext
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize COMILLA COROUT par_areatext
+    | MAQ DIVISION
+    ;
+
+parm_shisp ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT parm_shisp //fuera de style
+    | CORIN COLOR IGUAL COMILLA par_color COMILLA COROUT parm_shisp
+    | CORIN ALINGN IGUAL COMILLA ID COMILLA COROUT parm_shisp
+    | CORIN FONTFY IGUAL COMILLA ID COMILLA COROUT parm_shisp
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize COMILLA COROUT parm_shisp
+    | MAQ
+    ;
+
+parm_input ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT parm_input //fuera de style
+    | CORIN TYPE IGUAL COMILLA ID COMILLA COROUT parm_input
+    | CORIN COLOR IGUAL COMILLA par_color COMILLA COROUT parm_input
+    | CORIN ALINGN IGUAL COMILLA ID COMILLA COROUT parm_input
+    | CORIN FONTFY IGUAL COMILLA ID COMILLA COROUT parm_input
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize COMILLA COROUT parm_input
+    | MAQ
+    ;
+
+parm_image ::=  CORIN IDCM IGUAL COMILLA ID COMILLA COROUT parm_image //fuera de style
+    | CORIN SRC IGUAL COMILLA exp_links  COROUT parm_image
+    | CORIN ALT IGUAL COMILLA ID COMILLA COROUT parm_image
+    | CORIN WIDTH IGUAL COMILLA par_heigtwith COMILLA COROUT parm_image
+    | CORIN HEIGHT IGUAL COMILLA par_heigtwith COMILLA COROUT parm_image
+    | MAQ
+    ;
+
+exp_proceso ::= PROCESOS PARIN PAROUT COMILLA
+    | LOAD PARIN PAROUT COMILLA 
+    ;
+
+exp_cadenatext ::= CADENA exp_cadenatext
+    | ID exp_cadenatext
+    | NUMENTERO exp_cadenatext
+    | NUMDECIMAL exp_cadenatext
+    | SUMA exp_cadenatext
+    | RESTA exp_cadenatext
+    | PRODUCTO exp_cadenatext
+    | DIVISION exp_cadenatext
+    | DOSP exp_cadenatext
+    | COMA exp_cadenatext
+    | IGUAL exp_cadenatext
+    | PARIN exp_cadenatext
+    | PAROUT exp_cadenatext
+    | MEQ DIVISION
+    ;
+
+exp_opciones ::= MEQ OPTION MAQ exp_cadenatext  OPTION MAQ exp_opciones
+    | MEQ DIVISION
+    ;
+
+par_color ::= ID
+    | HEXADECIMAL
+    ;
+
+par_fontsize ::= NUMENTERO ID
+    | NUMDECIMAL ID
+    ;
+
+par_heigtwith ::= NUMENTERO ID
+    | NUMDECIMAL ID
+    | NUMENTERO CADENA
+    | NUMDECIMAL CADENA
+    ;
+
+exp_script ::= MEQ SCRIPT MAQ exp_funciones
+    ;
+
+exp_funciones ::= LOAD PARIN PAROUT CORIN instrucciones exp_funciones
+    | PROCESOS PARIN PAROUT CORIN instrucciones exp_funciones
+    | MEQ DIVISION SCRIPT MAQ
+    ;
+
+instrucciones ::= exp_variables instrucciones //ya 
+    | ALERTF PARIN texto PAROUT PUNTOCOMA instrucciones //ya
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones //ya
+    | IF PARIN condiciones  THEN INIT LLAVEIN DOSP instrucciones_intro instrucciones_if instrucciones
+    | REPEAT PARIN condiciones_repeat PAROUT HUNTIL PARIN limit_repeat PAROUT INIT LLAVEIN DOSP instrucciones_intro instrucciones
+    | WHILE PARIN condiciones  THENWHILE INIT LLAVEIN DOSP instrucciones_intro instrucciones
+    | INSERT PARIN par_insert PUNTOCOMA instrucciones //ya
+    | COROUT
+    | error instrucciones
+    ;
+
+instrucciones_intro ::= exp_variables instrucciones_intro //ya 
+    | ALERTF PARIN texto PAROUT PUNTOCOMA instrucciones_intro //ya
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones_intro //ya
+    | IF PARIN condiciones  THEN INIT LLAVEIN DOSP instrucciones_intro instrucciones_if instrucciones_intro
+    | REPEAT PARIN condiciones_repeat PAROUT HUNTIL PARIN limit_repeat PAROUT INIT LLAVEIN DOSP instrucciones_intro instrucciones_intro
+    | WHILE PARIN condiciones  THENWHILE INIT LLAVEIN DOSP instrucciones_intro instrucciones_intro
+    | INSERT PARIN par_insert PUNTOCOMA instrucciones_intro //ya
+    | DOSP LLAVEOUT END
+    | error instrucciones_intro
+    ;
+
+condiciones ::= NOT condiciones 
+    | exp_condicion exp_conds 
+    ;
+
+exp_conds ::=  signo_condicion exp_condicion oper_cond
+    |  oper_cond 
+    ;
+
+exp_condicion ::= BOOLEANOS
+    | limit_repeat
+    | COMILLA ID COMILLA
+    | COMILLA CADENA COMILLA
+    ;
+
+oper_cond ::= AND AND condiciones
+    | OR OR condiciones
+    | PAROUT
+    ;
+
+signo_condicion ::= IGUAL IGUAL
+    | NOT IGUAL
+    | MEQ
+    | MEQ IGUAL
+    | MAQ 
+    | MAQ IGUAL
+    ;
+
+instrucciones_if ::= ELSE IF PARIN condiciones  THEN INIT LLAVEIN DOSP instrucciones_intro instrucciones_if
+    | ELSE INIT LLAVEIN DOSP instrucciones_intro
+    | /*LAMBDA*/
+    ;
+
+limit_repeat ::= numeros SUMA limit_repeat
+    | numeros RESTA limit_repeat
+    | numeros PRODUCTO limit_repeat
+    | numeros DIVISION limit_repeat
+    | PARIN limit_repeat PAROUT expr_numerica
+    | numeros
+    ;
+
+expr_numerica ::= SUMA limit_repeat
+    | RESTA limit_repeat
+    | PRODUCTO limit_repeat
+    | DIVISION limit_repeat
+    | /*LAMBDA*/
+    ;
+
+condiciones_repeat ::= ID IGUAL numeros
+    | ENTERO ID IGUAL numeros
+    ;
+
+numeros ::= NUMENTERO 
+    | NUMDECIMAL 
+    | ID
+    ;
+
+exp_variables ::= ENTERO ID exp_entero
+    | DECIMAL ID exp_decimal
+    | CHAR ID exp_char
+    | STRING ID exp_string
+    | BOOLEANO ID exp_boolean
+    | ENTERO GLOBAL ID exp_entero
+    | DECIMAL GLOBAL ID exp_decimal
+    | CHAR GLOBAL ID exp_char
+    | STRING GLOBAL ID exp_string
+    | BOOLEANO GLOBAL ID exp_boolean
+    ;
+
+exp_boolean ::= IGUAL dat_boolean exp_oper_bool
+    | COMA ID exp_boolean
+    | PUNTOCOMA
+    ;
+
+dat_boolean ::= BOOLEANOS 
+    | ID
+    ;
+
+exp_oper_bool ::= OR dat_boolean exp_oper_bool
+    | OR OR dat_boolean exp_oper_bool
+    | AND dat_boolean exp_oper_bool
+    | AND AND dat_boolean exp_oper_bool
+    | COMA ID exp_boolean
+    | PUNTOCOMA
+    ;
+
+exp_string ::= IGUAL dato_string exp_oper_string
+    | COMA ID exp_string
+    | IGUAL GETID PARIN APOSTROFO ID APOSTROFO PAROUT exp_oper_string
+    | IGUAL exp_funciones_especial exp_oper_string
+    | PUNTOCOMA
+    ;
+
+exp_funciones_especial ::= ASCF PARIN par_function_esp PAROUT
+    | DESCF PARIN par_function_esp PAROUT
+    | LETPF PARIN par_function_esp PAROUT
+    | LETIMF PARIN par_function_esp PAROUT
+    | REVERSEF PARIN par_function_esp PAROUT
+    ;
+
+par_function_esp ::= ID
+    | COMILLA exp_links 
+    ;
+
+exp_oper_string ::= SUMA dato_string exp_oper_string
+    | COMA ID exp_string
+    | PUNTOCOMA
+    ;
+
+
+dato_string ::= NUMENTERO
+    | CARACTER 
+    | NUMDECIMAL
+    | COMILLA exp_links 
+    | ID
+    ;
+
+exp_char ::= IGUAL CARACTER dat_char
+    | COMA ID exp_char
+    | IGUAL CARALEF PARIN PAROUT dat_char
+    | PUNTOCOMA
+    ;
+
+dat_char ::= COMA ID exp_char
+    | PUNTOCOMA
+    ;
+
+exp_entero ::= IGUAL dato_entero  exp_opeinteger
+    | COMA ID exp_entero
+    | IGUAL NUMALEF PARIN PAROUT exp_opeinteger
+    | PUNTOCOMA
+    ;
+
+exp_opeinteger ::= SUMA dato_entero exp_opeinteger
+    | RESTA dato_entero exp_opeinteger
+    | DIVISION dato_entero exp_opeinteger
+    | PRODUCTO dato_entero exp_opeinteger
+    | COMA ID exp_entero
+    | PUNTOCOMA
+    ;
+
+dato_entero ::= NUMENTERO
+    | BOOLEANOS
+    | CARACTER 
+    | ID
+    ;
+
+exp_decimal ::= IGUAL dato_decimal  exp_oper_decimal
+    | COMA ID exp_decimal
+    | IGUAL NUMALEF PARIN PAROUT exp_oper_decimal
+    | PUNTOCOMA
+    ;
+
+exp_oper_decimal ::= SUMA dato_decimal exp_oper_decimal
+    | RESTA dato_decimal exp_oper_decimal
+    | DIVISION dato_decimal exp_oper_decimal
+    | PRODUCTO dato_decimal exp_oper_decimal
+    | COMA ID exp_decimal
+    | PUNTOCOMA
+    ;
+
+dato_decimal ::= NUMENTERO
+    | NUMDECIMAL
+    | BOOLEANOS
+    | CARACTER 
+    | ID
+    ;
+
+par_insert ::= ID par_insert1
+    | APOSTROFO texto_insert  par_insert1
+    ;
+
+par_insert1 ::= COMA ID par_insert1
+    | COMA APOSTROFO texto_insert  par_insert1
+    | PAROUT
+    ;
+
+texto_insert ::=  mensaje_texto
+    | texto_etiqueta APOSTROFO
+    ;
+
+
+texto_etiqueta ::= MEQ SPAM parm_shisp exp_cadenatext  SPAM MAQ    {:System.out.println("contenido html");:}
+    | MEQ SELECTED parm_shisp exp_opciones  SELECTED MAQ 
+    | MEQ H1 parm_shisp exp_cadenatext  H1 MAQ 
+    | MEQ P parm_shisp exp_cadenatext  P MAQ 
+    | MEQ BR MAQ exp_contenido
+    | MEQ INPUT parm_input exp_cadenatext  INPUT MAQ 
+    | MEQ IMG parm_image MEQ DIVISION IMG MAQ 
+    | MEQ TEXTAREA par_areatext TEXTAREA MAQ 
+    | MEQ DIV par_div contenido_div DIV MAQ  //falta contenido_div y par div
+    | MEQ BUTTON par_button  exp_cadenatext BUTTON MAQ  //falta par_button
+    | error exp_contenido            {:System.out.println("error html");:}
+    ;
+
+texto ::= ID
+    | APOSTROFO mensaje_texto
+    ;
+
+mensaje_texto ::= CADENA mensaje_texto
+    | ID mensaje_texto
+    | NUMENTERO mensaje_texto
+    | NUMDECIMAL mensaje_texto
+    | SUMA mensaje_texto
+    | RESTA mensaje_texto
+    | PRODUCTO mensaje_texto
+    | DIVISION mensaje_texto
+    | DOSP mensaje_texto
+    | COMA mensaje_texto
+    | IGUAL mensaje_texto
+    | PARIN mensaje_texto
+    | PAROUT mensaje_texto
+    | APOSTROFO
+    ;
+
