@@ -1,0 +1,69 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 17 may. 2021, 0:12:29
+    Author     : hectoradolfo
+*/
+
+.button-row {
+    color:black;
+    background-color: red;
+    box-shadow:4px 4px 4px 7px green;
+    display: table-cell;
+    width: 230px;
+    font-size: 18px;
+    font-style: italic;
+  }
+ 
+  .file {
+    color:black;
+    background-color: blueviolet;
+    box-shadow:4px 4px 4px 7px green;
+    display: table-cell;
+    width: 300px;
+    font-size: 12px;
+    font-style: italic;
+  }
+  
+  .label {
+    display: flex;
+    justify-content: center;
+    color: black;
+    font-size: 16px;
+    width: 170px;
+    padding: 10px 25px;
+    border-style:dashed;
+    box-shadow:4px 4px 4px 7px chartreuse;
+  }
+  
+    .example-full-width {
+    display: flex;
+    justify-content: center;
+    color: black;
+    font-size: 14px;
+    padding: 11px 25px;
+    border-style:dashed;
+    box-shadow:10px 10px 3px 12px green;
+  }
+  
+  .example-full-width2 {
+    display: flex;
+    justify-content: center;
+    color: black;
+    font-size: 14px;
+    padding: 11px 25px;
+    border-style:dotted;
+    box-shadow:10px 10px 3px 12px khaki;
+  }
+  
+  /*.textArea {
+      vertical-align: middle;
+      margin-left: 4%;
+    background-position: 50%50%;
+    color: black;
+    border-style:dotted;
+    box-shadow:10px 10px 12px 12px steelblue;
+  }*/

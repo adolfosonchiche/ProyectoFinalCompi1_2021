@@ -37,11 +37,14 @@ HEXADECIMAL = #[0-9a-fA-F0]{6}
 //CADENACOMILLA = [\"]([^\"]|(\\\")[.])*[\"]
 //CADENA = ([^|[ \n] ])+
 PROCESOS = "PROCESS_"{ID}
-CADENA = ([A-Za-zñÑáéíóúÁÉÍÓÚ]*[¡¿?%\.]*)+[0-9]*
+CADENA = ([A-Za-zñÑáéíóúÁÉÍÓÚ]*[¡¿?%\.]*)+[0-9_]*
 
 
 %{
 private List<String> errorList;
+private List<String> listIdEtiqueta;
+private String erroresIn = "", lexErr = "";
+private int lineErr = 0, columnErr = 0;
 
 %}
 
@@ -49,22 +52,46 @@ private List<String> errorList;
 	private Symbol symbol(int type) {
         String lexeme = yytext();
         //System.out.printf("Token tipo %d, lexeme %s, en linea %d, columna %d\n", type, lexeme == null ? "" : lexeme, yyline + 1, yycolumn + 1);
-        return new Symbol(type, new Token(lexeme, yyline + 1, yycolumn + 1));
+        return new Symbol(type, new Token(lexeme, yyline, yycolumn));
     }
 
     private Symbol symbol(int type, String lexeme) {
         //System.out.printf("Token tipo %d, lexeme %s, en linea %d, columna %d\n", type, lexeme == null ? "" : lexeme, yyline + 1, yycolumn + 1);
-        return new Symbol(type, new Token(lexeme, yyline + 1, yycolumn + 1));
+        if(type == ID){
+          System.out.println("VIIIIDAAAALLLIAAA" + type);
+        }
+        return new Symbol(type, new Token(lexeme, yyline, yycolumn + 1));
     }
 
     private void error(String lexeme) {
-       // System.out.printf("Error Lexico en el Texto: %s  linea %d,  columna %d. \n", lexeme, yyline + 1, yycolumn + 1);
-        errorList.add(String.format("Error Lexico del simbolo: %s , linea %d, columna %d,  no reconocido, resuelva!.", lexeme, yyline + 1, yycolumn + 1));
+
+      if(lineErr == 0){
+        lineErr = yyline;
+        columnErr = yycolumn;
+        erroresIn = lexeme;
+        lexErr = lexeme;
+      } else {
+        if(lineErr == yyline){
+          erroresIn += " " + lexeme;
+        } else {
+            errorList.add(String.format("Error Lexico, no se reconoce el lexema: %s  linea %d,  . y los lexemas: %s no reconocidos en la misma linea\n", lexErr, lineErr, erroresIn));
+            System.out.printf("Error Lexico en el Texto: %s  linea %d,  columna %d. y los token: %s en la misma linea\n", lexErr, lineErr, columnErr, erroresIn);
+            lineErr = yyline;
+            columnErr = yycolumn;
+            erroresIn = lexeme;
+            lexErr = lexeme;
+        }
+
+      }
+
+       //System.out.printf("Error Lexico en el Texto: %s  linea %d,  columna %d. \n", lexeme, yyline + 1, yycolumn + 1);
+        //errorList.add(String.format("Error Lexico del simbolo: %s , linea %d, columna %d,  no reconocido, resuelva!.", lexeme, yyline + 1, yycolumn + 1));
     }
 
     public List<String> getErrorList() {
         return errorList;
     }
+    public int dat (){ return lineErr;}
 %}
 
 %init{
@@ -129,7 +156,7 @@ private List<String> errorList;
 ">"				{ return symbol(MAQ, yytext());}
 //logicos
 "|"			{ return symbol(OR, yytext());}
-"&"			{ return symbol(AND, yytext()); System.out.println("este es un "  + yytext());}
+"&"			{ return symbol(AND, yytext()); }
 "!"			{ return symbol(NOT, yytext());}
 //aritmeticos
 "+"			{ return symbol(SUMA, yytext());}
@@ -176,7 +203,7 @@ private List<String> errorList;
 {PROCESOS}   { return symbol(PROCESOS, yytext());}
 {BOOLEANOS}  {  return symbol(BOOLEANOS, yytext()); }
 {ID}         { return symbol(ID, yytext());}
-   
+
 {NUMENTERO}    {  return symbol(NUMENTERO, yytext()); }
 {NUMDECIMAL}   {  return symbol(NUMDECIMAL, yytext()); }
    
@@ -184,6 +211,6 @@ private List<String> errorList;
 {HEXADECIMAL}   { return symbol(HEXADECIMAL, yytext());}
 {CADENA}      { return symbol(CADENA, yytext());}
 {ESPACIOS}    { /*Ignoramos*/}
-[^]          { error(yytext());} 
 
+[^]          { error(yytext());} 
 }
