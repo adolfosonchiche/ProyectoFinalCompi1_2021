@@ -13,9 +13,11 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     //declaracion de variables
     private int filaErr = 0, columnErr = 0;
     private String datErr = "", lexErr = "", idCaptcha = "", namehtml = "", captchaCreado = "";
+    private String varscriptGlobal = "<script> \n";
     private List<String> errorSintactico;
     private List<String> errorSemantico;
     private List<String> listIdEtiqueta;
+    private List<String> listIdVar;
     private List<LexemeId> ListTablaSimbol;
     private EtiquetaId etiquetaId;
     private TablaSimbolo tablaSimbolo;
@@ -27,11 +29,12 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
 
         this.errorSintactico = new ArrayList();
         this.errorSemantico = new ArrayList();
-        this.listIdEtiqueta = new ArrayList();
+        this.listIdEtiqueta = lex.getListIdEtiqueta();
+        this.listIdVar = lex.getListIdVar();
         this.ListTablaSimbol = new ArrayList();
         this.etiquetaId = new EtiquetaId();
         this.tablaSimbolo = new TablaSimbolo();
-        asd = lex.dat();
+      
     }
 
 
@@ -111,7 +114,7 @@ non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp
             exp_opeinteger, dato_decimal, exp_oper_decimal, texto_insert, dat_char, 
             dato_string, exp_oper_string, exp_funciones_especial, par_function_esp, dat_boolean,
             exp_oper_bool, numeros, expr_numerica, signo_condicion, exp_condicion, oper_cond,
-            exp_conds, exp_dir, exp_oper_id;
+            exp_conds, exp_dir, exp_oper_id, text_string;
 
 
 /* Producciones siendo A el inicial*/
@@ -161,22 +164,22 @@ par_link ::= CORIN REFERENCIA IGUAL COMILLA exp_links COROUT par_link
     | MAQ
     ;
 
-exp_links ::= ID exp_links
-    | DOSP exp_links
-    | DIVISION exp_links
-    | CADENA exp_links
-    | IGUAL exp_links
-    | NUMENTERO exp_links
-    | AND exp_links
-    | NUMDECIMAL exp_links
-    | SUMA exp_links
-    | PRODUCTO exp_links
-    | RESTA exp_links
-    | PARIN exp_links
-    | PAROUT exp_links
-    | COMA exp_links
-    | HEXADECIMAL exp_links
-    | COMILLA
+exp_links ::= ID:tp exp_links:n          {:RESULT = tp.getLexema() + n.toString(); :}
+    | DOSP:tp exp_links:n               {:RESULT = tp.getLexema() + n.toString(); :}
+    | DIVISION:tp exp_links:n           {:RESULT = tp.getLexema() + n.toString(); :}
+    | CADENA:tp exp_links:n             {:RESULT = tp.getLexema() + n.toString(); :}
+    | IGUAL:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
+    | NUMENTERO:tp exp_links:n          {:RESULT = tp.getLexema() + n.toString(); :}
+    | AND:tp exp_links:n                {:RESULT = tp.getLexema() + n.toString(); :}
+    | NUMDECIMAL:tp exp_links:n         {:RESULT = tp.getLexema() + n.toString(); :}
+    | SUMA:tp exp_links:n               {:RESULT = tp.getLexema() + n.toString(); :}
+    | PRODUCTO:tp exp_links:n           {:RESULT = tp.getLexema() + n.toString(); :}
+    | RESTA:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
+    | PARIN:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
+    | PAROUT:tp exp_links:n             {:RESULT = tp.getLexema() + n.toString(); :}
+    | COMA:tp exp_links:n               {:RESULT = tp.getLexema() + n.toString(); :}
+    | HEXADECIMAL:tp exp_links:n        {:RESULT = tp.getLexema() + n.toString(); :}
+    | COMILLA:tp                        {:RESULT = tp.getLexema(); :}
     ;
 
 exp_contenido ::= MEQ SPAM parm_shisp exp_cadenatext  SPAM MAQ exp_contenido   {:System.out.println("contenido html");:}
@@ -270,20 +273,24 @@ exp_proceso ::= PROCESOS PARIN PAROUT COMILLA
     | LOAD PARIN PAROUT COMILLA 
     ;
 
-exp_cadenatext ::= CADENA exp_cadenatext
-    | ID exp_cadenatext
-    | NUMENTERO exp_cadenatext
-    | NUMDECIMAL exp_cadenatext
-    | SUMA exp_cadenatext
-    | RESTA exp_cadenatext
-    | PRODUCTO exp_cadenatext
-    | DIVISION exp_cadenatext
-    | DOSP exp_cadenatext
-    | COMA exp_cadenatext
-    | IGUAL exp_cadenatext
-    | PARIN exp_cadenatext
-    | PAROUT exp_cadenatext
-    | MEQ DIVISION
+exp_cadenatext ::= CADENA:tp exp_cadenatext:n           {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | ID:tp exp_cadenatext:n                            {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | NUMENTERO:tp exp_cadenatext:n                     {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | NUMDECIMAL:tp exp_cadenatext:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | HEXADECIMAL:tp exp_cadenatext:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | SUMA:tp exp_cadenatext:n                          {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | RESTA:tp exp_cadenatext:n                         {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PRODUCTO:tp exp_cadenatext:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | AND:tp exp_cadenatext:n                           {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | OR:tp exp_cadenatext:n                            {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | NOT:tp exp_cadenatext:n                           {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DIVISION:tp exp_cadenatext:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DOSP:tp exp_cadenatext:n                          {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | COMA:tp exp_cadenatext:n                          {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | IGUAL:tp exp_cadenatext:n                         {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PARIN:tp exp_cadenatext:n                         {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PAROUT:tp exp_cadenatext:n                        {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | MEQ:tp DIVISION:n                                 {:RESULT = tp.getLexema() + n.getLexema(); :}
     ;
 
 exp_opciones ::= MEQ OPTION MAQ exp_cadenatext  OPTION MAQ exp_opciones
@@ -353,12 +360,12 @@ oper_cond ::= AND AND condiciones
     | PAROUT
     ;
 
-signo_condicion ::= IGUAL IGUAL
-    | NOT IGUAL
-    | MEQ
-    | MEQ IGUAL
-    | MAQ 
-    | MAQ IGUAL
+signo_condicion ::= IGUAL:tp IGUAL:n        {:RESULT = tp.getLexema() + n.getLexema(); :}
+    | NOT:tp IGUAL:n                        {:RESULT = tp.getLexema() + n.getLexema(); :}
+    | MEQ:tp                                {:RESULT = tp.getLexema(); :}
+    | MEQ:tp IGUAL:n                        {:RESULT = tp.getLexema() + n.getLexema(); :}
+    | MAQ:tp                                {:RESULT = tp.getLexema(); :}
+    | MAQ:tp IGUAL:n                        {:RESULT = tp.getLexema() + n.getLexema(); :}
     ;
 
 instrucciones_if ::= ELSE IF PARIN condiciones  THEN INIT LLAVEIN DOSP instrucciones_intro instrucciones_if
@@ -381,150 +388,158 @@ expr_numerica ::= SUMA limit_repeat
     | /*LAMBDA*/
     ;
 
-condiciones_repeat ::= ID IGUAL numeros
-    | ENTERO ID IGUAL numeros
+condiciones_repeat ::= ID:tp IGUAL:n numeros:e  {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | ENTERO ID:tp IGUAL:n numeros:e            {:RESULT = " let " tp.getLexema() + n.getLexema() + e.toString(); :}
     ;
 
-numeros ::= NUMENTERO 
-    | NUMDECIMAL 
-    | ID
+numeros ::= NUMENTERO:tp                   {:RESULT = tp.getLexema(); :}
+    | NUMDECIMAL:tp                         {:RESULT = tp.getLexema(); :}
+    | ID:tp                                 {:RESULT = tp.getLexema(); :}
     ;
 
-exp_variables ::= ENTERO ID exp_entero
-    | DECIMAL ID exp_decimal
-    | CHAR ID exp_char
-    | STRING ID exp_string
-    | BOOLEANO ID exp_boolean
-    | ENTERO GLOBAL ID exp_entero
-    | DECIMAL GLOBAL ID exp_decimal
-    | CHAR GLOBAL ID exp_char
-    | STRING GLOBAL ID exp_string
-    | BOOLEANO GLOBAL ID exp_boolean
-    | ID exp_dir
+exp_variables ::= ENTERO ID:tp exp_entero:n         {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+    | DECIMAL ID:tp exp_decimal:n                   {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+    | CHAR ID:tp exp_char:n                         {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+    | STRING ID:tp exp_string:n                     {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+    | BOOLEANO ID:tp exp_boolean:n                  {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+    | ENTERO GLOBAL ID:tp exp_entero:n              {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
+    | DECIMAL GLOBAL ID:tp exp_decimal:n            {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
+    | CHAR GLOBAL ID:tp exp_char:n                  {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
+    | STRING GLOBAL ID:tp exp_string:n              {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
+    | BOOLEANO GLOBAL ID:tp exp_boolean:n           {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
+    | ID:tp exp_dir:n                               {:RESULT = tp.getLexema() + n.toString(); :}
     ;
 
-exp_dir ::= IGUAL dato_string exp_oper_id
+exp_dir ::= IGUAL:tp dato_string:n exp_oper_id:e            {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
     ;
 
-exp_oper_id ::= SUMA dato_string exp_oper_id
-    | RESTA dato_string exp_oper_id
-    | DIVISION dato_string exp_oper_id
-    | PRODUCTO dato_string exp_oper_id
-    | COMA ID exp_dir
-    | PUNTOCOMA
+exp_oper_id ::= SUMA:tp dato_string:n exp_oper_id:e         {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | RESTA:tp dato_string:n exp_oper_id:e                  {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | DIVISION:tp dato_string:n exp_oper_id:e               {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PRODUCTO:tp dato_string:n exp_oper_id:e               {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
 
-exp_boolean ::= IGUAL dat_boolean exp_oper_bool
-    | COMA ID exp_boolean
-    | PUNTOCOMA
+exp_boolean ::= IGUAL:tp dat_boolean:n exp_oper_bool:e      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_boolean:e                            {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
 
-dat_boolean ::= BOOLEANOS 
-    | ID
-    ;
-
-exp_oper_bool ::= OR dat_boolean exp_oper_bool
-    | OR OR dat_boolean exp_oper_bool
-    | AND dat_boolean exp_oper_bool
-    | AND AND dat_boolean exp_oper_bool
-    | COMA ID exp_boolean
-    | PUNTOCOMA
-    ;
-
-exp_string ::= IGUAL dato_string exp_oper_string
-    | COMA ID exp_string
-    | IGUAL GETID PARIN APOSTROFO ID APOSTROFO PAROUT exp_oper_string
-    | IGUAL exp_funciones_especial exp_oper_string
-    | PUNTOCOMA
-    ;
-
-exp_funciones_especial ::= ASCF PARIN par_function_esp PAROUT
-    | DESCF PARIN par_function_esp PAROUT
-    | LETPF PARIN par_function_esp PAROUT
-    | LETIMF PARIN par_function_esp PAROUT
-    | REVERSEF PARIN par_function_esp PAROUT
-    ;
-
-par_function_esp ::= ID
-    | COMILLA exp_links 
-    ;
-
-exp_oper_string ::= SUMA dato_string exp_oper_string
-    | COMA ID exp_string
-    | PUNTOCOMA
-    ;
-
-
-dato_string ::= NUMENTERO
-    | CARACTER 
-    | NUMDECIMAL
-    | COMILLA exp_links 
-    | ID:tp                     {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+dat_boolean ::= BOOLEANOS:tp            {:  if(tp.getLexema().equals("true")) { RESULT = tp.getLexema();
+                                       } else if(tp.getLexema().equals("false")) { RESULT = tp.getLexema(); } else {
+                                         errorSemantico.add(String.format("Error sintactico con el lexema: %s  linea: %d  columna: %d. se esperaba true o false", tp.getLexema(), tp.getLine(), tp.getColumna()));
+                                         RESULT = tp.getLexema();
+                                        }  :} 
+    | ID:tp                             {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
     ;
 
-exp_char ::= IGUAL CARACTER dat_char
-    | COMA ID exp_char
-    | IGUAL CARALEF PARIN PAROUT dat_char
-    | PUNTOCOMA
+exp_oper_bool ::= OR:tp dat_boolean:n exp_oper_bool:e           {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | OR:tp OR:n dat_boolean:e exp_oper_bool:e1                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.toString(); :}
+    | AND:tp dat_boolean:n exp_oper_bool:e                      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | AND:tp AND:n dat_boolean:e exp_oper_bool:e1               {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.toString(); :}
+    | COMA:tp ID:n exp_boolean:e                                {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
     ;
 
-dat_char ::= COMA ID exp_char
-    | PUNTOCOMA
+exp_string ::= IGUAL:tp dato_string:n exp_oper_string:e         {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_string:e                                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | IGUAL:tp GETID:n PARIN:e APOSTROFO:e1 ID:e2 APOSTROFO:e3 PAROUT:e4 exp_oper_string:e5  {:RESULT = tp.getLexema()+n.getLexema()+e.getLexema()+e1.getLexema() + e2.getLexema()+e3.getLexema() + e4.getLexema()+ e5.toString(); :}
+    | IGUAL:tp exp_funciones_especial:n exp_oper_string:e       {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
     ;
 
-exp_entero ::= IGUAL dato_entero  exp_opeinteger
-    | COMA ID exp_entero
-    | IGUAL NUMALEF PARIN PAROUT exp_opeinteger
-    | PUNTOCOMA
+exp_funciones_especial ::= ASCF:tp PARIN:n par_function_esp:e PAROUT:e1     {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
+    | DESCF:tp PARIN:n par_function_esp:e PAROUT:e1                         {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
+    | LETPF:tp PARIN:n par_function_esp:e PAROUT:e1                         {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
+    | LETIMF:tp PARIN:n par_function_esp:e PAROUT:e1                        {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
+    | REVERSEF:tp PARIN:n par_function_esp:e PAROUT:e1                      {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
     ;
 
-exp_opeinteger ::= SUMA dato_entero exp_opeinteger
-    | RESTA dato_entero exp_opeinteger
-    | DIVISION dato_entero exp_opeinteger
-    | PRODUCTO dato_entero exp_opeinteger
-    | COMA ID exp_entero
-    | PUNTOCOMA
+par_function_esp ::= ID:tp              {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
+                              } else {
+                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
+                              }  RESULT = tp.getLexema(); :}
+    | COMILLA:tp text_string:n          {:RESULT = tp.getLexema()+" " + n.toString(); :}
     ;
 
-dato_entero ::= NUMENTERO:tp
+exp_oper_string ::= SUMA:tp dato_string:n exp_oper_string:e     {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_string:e                                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
+    ;
+
+
+dato_string ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
+    | CARACTER:tp                   {:RESULT = tp.getLexema(); :}
+    | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
+    | COMILLA:tp text_string:n      {:RESULT = tp.getLexema() + n.toString(); :}
+    | ID:tp                     {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
+                              } else {
+                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
+                              }  RESULT = tp.getLexema(); :}
+    ;
+
+exp_char ::= IGUAL:tp CARACTER:n dat_char:e                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | COMA:tp ID:n exp_char:e                               {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | IGUAL:tp CARALEF:n PARIN:e PAROUT:e1 dat_char:e2      {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema() + e1.getLexema() + e2.toString(); :}    
+    | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
+    ;
+
+dat_char ::= COMA:tp ID:n exp_char:e        {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                          {:RESULT = tp.getLexema(); :}
+    ;
+
+exp_entero ::= IGUAL:tp dato_entero:n  exp_opeinteger:e         {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_entero:e                                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | IGUAL:tp NUMALEF:n PARIN:e PAROUT:e1 exp_opeinteger:e2    {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema() + e1.getLexema() + e2.toString(); :}
+    | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
+    ;
+
+exp_opeinteger ::= SUMA:tp dato_entero:n exp_opeinteger:e       {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | RESTA:tp dato_entero:n exp_opeinteger:e                   {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | DIVISION:tp dato_entero:n exp_opeinteger:e                {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PRODUCTO:tp dato_entero:n exp_opeinteger:e                {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_entero:e                                 {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
+    ;
+
+dato_entero ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
     | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = "1";
                                        } else if(tp.getLexema().equals("false")) { RESULT = "0"; } else {
                                          errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);int asciiValue = as;  RESULT = asciiValue; :}
-    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
     ;
 
-exp_decimal ::= IGUAL dato_decimal  exp_oper_decimal
-    | COMA ID exp_decimal
-    | IGUAL NUMALEF PARIN PAROUT exp_oper_decimal
-    | PUNTOCOMA
+exp_decimal ::= IGUAL:tp dato_decimal:n  exp_oper_decimal:e        {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_decimal:e                                   {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                                                 {:RESULT = tp.getLexema(); :}
     ;
 
-exp_oper_decimal ::= SUMA dato_decimal exp_oper_decimal
-    | RESTA dato_decimal exp_oper_decimal
-    | DIVISION dato_decimal exp_oper_decimal
-    | PRODUCTO dato_decimal exp_oper_decimal
-    | COMA ID exp_decimal
-    | PUNTOCOMA
+exp_oper_decimal ::= SUMA:tp dato_decimal:n exp_oper_decimal:e     {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | RESTA:tp dato_decimal:n exp_oper_decimal:e                   {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | DIVISION:tp dato_decimal:n exp_oper_decimal:e                {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | PRODUCTO:tp dato_decimal:n exp_oper_decimal:e                {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_decimal:e                                   {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+    | PUNTOCOMA:tp                                                 {:RESULT = tp.getLexema(); :}
     ;
 
 dato_decimal ::= NUMENTERO:tp       {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
     | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = 1;
                                        } else if(tp.getLexema().equals("false")) { RESULT = 0; } else {
-                                         errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
+                                         errorSemantico.add(String.format("Error sintactico no se esperaba el lexema: %s  linea: %d  columna: %d. se esperaba un true o false.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);int asciiValue = as;  RESULT = asciiValue; :} 
-    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
@@ -562,7 +577,7 @@ texto_etiqueta ::= MEQ SPAM parm_shisp:p exp_cadenatext:n  SPAM MAQ  {:RESULT = 
     | MEQ BUTTON par_button:p  exp_cadenatext:n BUTTON MAQ  {:RESULT = "<button " + p.toString()+"> " + n.toString() + "</button>"; :}
     ;
 
-texto ::= ID:tp                {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+texto ::= ID:tp                {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }RESULT = tp.getLexema(); :}
@@ -585,3 +600,18 @@ mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " +
     | APOSTROFO:tp                               {:RESULT = tp.getLexema(); :}
     ;
 
+text_string ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | ID:tp mensaje_texto:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | NUMENTERO:tp mensaje_texto:n               {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | NUMDECIMAL:tp mensaje_texto:n              {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | SUMA:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | RESTA:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PRODUCTO:tp mensaje_texto:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DIVISION:tp mensaje_texto:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DOSP:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | COMA:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | IGUAL:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PARIN:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PAROUT:tp mensaje_texto:n                  {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | COMILLA:tp                               {:RESULT = tp.getLexema(); :}
+    ;

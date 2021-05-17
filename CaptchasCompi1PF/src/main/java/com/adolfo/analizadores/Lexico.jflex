@@ -31,7 +31,7 @@ NUMDECIMAL = [\-]? ([0]|[0]?[1-9][0-9]*)("."[0-9][0-9]?[0-9]?[0-9]?)?
 COMENTUNILINEA =("!!".*\r\n)|("!!".*\n)|("!!".*\r)
 COMENTMULTILINEA ="<!--""<!--"*([^*/]|[^*]">"|"*"[^/])*"*"*"-->"
 BOOLEANOS = "true"|"false"
-ID = [_$-]*[a-zA-Z]+([a-zA-Z]*[_$-]*[0-9]*)+ /*para obtener un id*/
+ID = [_$]*[a-zA-Z]+([a-zA-Z]*[_$]*[0-9]*)+ /*para obtener un id*/
 CARACTER = [']([^\"\n]|(\\\")[.])[']
 HEXADECIMAL = #[0-9a-fA-F0]{6}
 //CADENACOMILLA = [\"]([^\"]|(\\\")[.])*[\"]
@@ -43,6 +43,7 @@ CADENA = ([A-Za-zñÑáéíóúÁÉÍÓÚ]*[¡¿?%\.]*)+[0-9_]*
 %{
 private List<String> errorList;
 private List<String> listIdEtiqueta;
+private List<String> listIdVar;
 private String erroresIn = "", lexErr = "";
 private int lineErr = 0, columnErr = 0;
 
@@ -91,7 +92,12 @@ private int lineErr = 0, columnErr = 0;
     public List<String> getErrorList() {
         return errorList;
     }
-    public int dat (){ return lineErr;}
+    public List<String> getListIdEtiqueta() {
+        return listIdEtiqueta;
+    }
+    public List<String> getListIdVar() {
+        return listIdVar;
+    }
 %}
 
 %init{
