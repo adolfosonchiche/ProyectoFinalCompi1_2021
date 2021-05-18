@@ -53,27 +53,12 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     @Override
     public void syntax_error(Symbol st) {
        Token token = (Token) st.value;
-        if(filaErr == 0){
-            filaErr = token.getLine();
-            columnErr = token.getColumna();
-            datErr = token.getLexema();
-            lexErr = token.getLexema();
-        } else {
-            if(filaErr == token.getLine()){
-                datErr += " " + token.getLexema();
-            } else {
-                System.out.println("err: " + lexErr + " este no pertenece a la estructura - linea: " + filaErr + ", columna: " + columnErr + " y verificar lexemas: " + datErr);
+      
                 errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
-                filaErr = token.getLine();
-                columnErr = token.getColumna();
-                datErr = token.getLexema();
-                lexErr = token.getLexema();
-            }
-
-        }
+             
         //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
 
-    // System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
+    System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
        // errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
     }
 
@@ -83,6 +68,16 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     public List<String> getErrorSintactico(){
 	        return errorSintactico;
 	    }
+        public List<String> getErroSemantico(){
+	        return errorSemantico;
+	    }
+        public String getCaptchaCreado(){
+            return captchaCreado;
+        }
+
+        public String getIdCaptcha(){
+            return idCaptcha;
+        }
 
     public List<LexemeId> getListTablaSimbol(){
 	        return ListTablaSimbol;
@@ -121,20 +116,20 @@ non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp
 /* Producciones siendo A el inicial*/
 start with exp_ini;
 
- exp_ini ::= MEQ HTML par_html exp_head  {: captchaCreado += "<HTML  ";
-                                  System.out.println("TE AMO CARMEN QUIERO VERTE OTRA VEZ");   System.out.println("VIDALIA " + captchaCreado);       :}
-    | error exp_head    {:System.out.println("error html en inicio");:}
+ exp_ini ::= MEQ HTML par_html:tp exp_head:n  {: captchaCreado += "<HTML  " + tp.toString() + "\n" + varscriptGlobal + "\n</script>\n"+ n.toString();
+                                                  System.out.println("vx " + captchaCreado);       :}
+    | error exp_head                         {:System.out.println("error html en inicio");:}
     ;
 
-par_html ::= CORIN IDCM IGUAL COMILLA ID:i COMILLA COROUT par_html:s  {: idCaptcha = i.getLexema(); parId++; 
-                                                        if(etiquetaId.existeId(idCaptcha, listIdEtiqueta)){ System.out.println("si existe");
-                                                        } else {System.out.println("no existe"); listIdEtiqueta.add(idCaptcha);}
-                                                        if(parId > 1){System.out.println("error semantico, aparece 2 veces el parametro id en la etiqueta htm");}  
-                                                              :} 
-    | CORIN NAME IGUAL COMILLA:c exp_name:i COROUT par_html     {: namehtml = c.getLexema() + i.toString(); parName++; System.out.println("CVXG  " + i.toString()+ " te amo Vidalia "+asd);
-                                                        if(parName > 1){System.out.println("error semantico, aparece 2 veces el parametro name en la etiqueta htm");}  
-                                                              :} 
-    | MAQ:a        {:System.out.println("sintactico parametros html" + a.getLexema() + " " + idCaptcha + " as " + namehtml);:}
+par_html ::= CORIN IDCM IGUAL COMILLA ID:i COMILLA COROUT par_html:n  {: idCaptcha = i.getLexema(); parId++;                                                
+                                                                        if(parId > 1){errorSemantico.add("error semantico, aparece 2 veces el parametro id en la etiqueta htm");}  
+                                                                        RESULT = "  id=\"" + i.getLexema() + "\"  " + n.toString();
+                                                                     :} 
+    | CORIN NAME IGUAL COMILLA exp_name:i COROUT par_html:n     {: namehtml =  i.toString(); parName++; 
+                                                                     if(parName > 1){errorSemantico.add("error semantico, aparece 2 veces el parametro name en la etiqueta htm");}  
+                                                                    RESULT = "  name=\"" + i.toString() + "\"  " + n.toString();
+                                                                :} 
+    | MAQ:a                                                     {:RESULT = a.getLexema(); :}            
     ;
 
 exp_name ::= CADENA:tp exp_name:n        {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -144,25 +139,26 @@ exp_name ::= CADENA:tp exp_name:n        {:RESULT = tp.getLexema()+" " + n.toStr
     | COMILLA:tp                         {:RESULT = tp.getLexema(); :}
     ;
 
-exp_head ::= MEQ HEAD MAQ par_head MEQ BODY par_body  exp_contenido   {:System.out.println("sintactico head");:}
-    | exp_script exp_head
-    | MEQ BODY par_body  exp_contenido  
+exp_head ::= MEQ HEAD MAQ par_head:tp MEQ BODY par_body:n  exp_contenido:e     {:   RESULT = "<head> "+ tp.toString() + "  \n<body "+ n.toString() + " \n " +e.toString() ; :}
+    | exp_script:tp exp_head:n                                          {:RESULT = tp.toString()+" " + n.toString(); :}
+    | MEQ BODY par_body:tp  exp_contenido:n                             {: RESULT = "<body "+ tp.toString() + "  "+ n.toString() ; :} 
+    | error exp_contenido
     ;
 
 
-par_head ::= MEQ TITLE MAQ exp_cadenatext  TITLE MAQ par_head
-    | MEQ LINK par_link MEQ DIVISION LINK MAQ par_head
-    | MEQ DIVISION HEAD MAQ
-    | exp_script par_head
+par_head ::= MEQ TITLE MAQ exp_cadenatext:tp  TITLE MAQ par_head:n      {: RESULT = "<title> "+ tp.toString() + "title>  "+ n.toString() ; :}
+    | MEQ LINK par_link:tp MEQ DIVISION LINK MAQ par_head:n             {: RESULT = "<link "+ tp.toString() + "</link>  "+ n.toString() ; :}     
+    | MEQ DIVISION HEAD MAQ                                             {:RESULT = " </head> "; :}
+    | exp_script:tp par_head:n                                          {:RESULT = tp.toString()+" " + n.toString(); :}
     ;
 
-par_body ::= CORIN BACKGROUND IGUAL COMILLA par_color COMILLA COROUT par_link
-    | MAQ
+par_body ::= CORIN BACKGROUND IGUAL COMILLA:tp par_color:n COMILLA:e COROUT par_body:e1   {:RESULT = "  BgColOr=" + tp.getLexema() + n.toString() + e.getLexema() + e1.toString(); :}
+    | MAQ:tp                                                                    {:RESULT = tp.getLexema() + " "; :}
     ;
 
 
-par_link ::= CORIN REFERENCIA IGUAL COMILLA exp_links COROUT par_link
-    | MAQ
+par_link ::= CORIN REFERENCIA IGUAL COMILLA:tp exp_links:n COROUT par_link:e {:RESULT = " href=" +tp.getLexema() + n.toString() + " " + e.toString(); :}
+    | MAQ:tp                                                                 {:RESULT = tp.getLexema() + " "; :}
     ;
 
 exp_links ::= ID:tp exp_links:n          {:RESULT = tp.getLexema() + n.toString(); :}
@@ -183,52 +179,50 @@ exp_links ::= ID:tp exp_links:n          {:RESULT = tp.getLexema() + n.toString(
     | COMILLA:tp                        {:RESULT = tp.getLexema(); :}
     ;
 
-exp_contenido ::= MEQ SPAM parm_shisp exp_cadenatext  SPAM MAQ exp_contenido   {:System.out.println("contenido html");:}
-    | MEQ SELECTED parm_shisp exp_opciones  SELECTED MAQ exp_contenido
-    | MEQ H1 parm_shisp exp_cadenatext  H1 MAQ exp_contenido
-    | MEQ P parm_shisp exp_cadenatext  P MAQ exp_contenido
-    | MEQ BR MAQ exp_contenido
-    | MEQ INPUT parm_input exp_cadenatext  INPUT MAQ exp_contenido
-    | MEQ IMG parm_image MEQ DIVISION IMG MAQ exp_contenido
-    | MEQ TEXTAREA par_areatext TEXTAREA MAQ exp_contenido
-    | MEQ DIV par_div contenido_div DIV MAQ exp_contenido //falta contenido_div y par div
-    | MEQ BUTTON par_button  exp_cadenatext BUTTON MAQ exp_contenido //falta par_button
-    | exp_script exp_contenido
-    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ  {: captchaCreado += "</body> \n</html>"; System.out.println("err: " + lexErr + " este no pertenece a la estructura - linea: " + filaErr + ", columna: " + columnErr + " y verificar lexemas: " + datErr);
-                //errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));:}
-    | MEQ DIVISION HTML MAQ   {: captchaCreado += "</html>"; System.out.println("err: " + lexErr + " este no pertenece a la estructura - linea: " + filaErr + ", columna: " + columnErr + " y verificar lexemas: " + datErr);
-                //errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));:}
-    | error exp_contenido            {:System.out.println("error html");:}
+exp_contenido ::= MEQ SPAM  parm_shisp:tp exp_cadenatext:n  SPAM MAQ exp_contenido:e     {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
+    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ exp_contenido:e                {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
+    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ exp_contenido:e                          {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
+    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ exp_contenido:e                            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
+    | MEQ BR MAQ exp_contenido:tp                                                       {: RESULT = "\n<br> " + tp.toString(); :}
+    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ exp_contenido:e                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
+    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ exp_contenido:e                           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ exp_contenido:e                            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ DIV par_div:tp contenido_div:n DIV MAQ exp_contenido:e                             {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
+    | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ exp_contenido:e                  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
+    | exp_script:tp exp_contenido:n                                                     {:RESULT = tp.toString()+" " + n.toString(); :}
+    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ  {:    RESULT = "</body> \n</html>"; :}
+    | MEQ DIVISION HTML MAQ   {:    RESULT = "</html>"; :}
+    | error exp_contenido            {:System.out.println("error sintactico"); :}
     ;
 
-contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_div:e    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<spam "+ styl + tp.toString()+"> " + n.toString() + "</spam>  " + e.toString(); :}
-    | MEQ SELECTED parm_shisp exp_opciones  SELECTED MAQ contenido_div
-    | MEQ H1 parm_shisp exp_cadenatext  H1 MAQ contenido_div
-    | MEQ P parm_shisp exp_cadenatext  P MAQ contenido_div
-    | MEQ BR MAQ contenido_div
-    | MEQ INPUT parm_input exp_cadenatext  INPUT MAQ contenido_div
-    | MEQ IMG parm_image MEQ DIVISION IMG MAQ contenido_div
-    | MEQ TEXTAREA par_areatext TEXTAREA MAQ contenido_div
-    | MEQ BUTTON par_button  exp_cadenatext  BUTTON MAQ contenido_div //falta par_button
-    | exp_script contenido_div
-    | MEQ DIVISION DIV MAQ 
+contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_div:e    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
+    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ contenido_div:e          {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
+    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ contenido_div:e                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
+    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ contenido_div:e                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
+    | MEQ BR MAQ contenido_div:tp                                                      {:RESULT = "\n<br> " + tp.toString(); :}
+    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ contenido_div:e              {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
+    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ contenido_div:e                       {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ contenido_div:e                        {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ BUTTON par_button:tp  exp_cadenatext:n  BUTTON MAQ contenido_div:e           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
+    | exp_script:tp contenido_div:n                                                    {:RESULT = tp.toString()+" " + n.toString(); :}
+    | MEQ DIVISION DIV MAQ                                                             {:RESULT = " </div>"; :}
     ;
 
 par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                     {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
                                                                                     { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n               {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                     {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
                                                                                     { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_div:n           {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n          {: parInput += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN CLASE IGUAL COMILLA ID:tp COROUT par_div:n                              {: if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
                                                                                     { parInput += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | MAQ:tp                                                                        {:RESULT = tp.getLexema(); :}
     ;
@@ -236,12 +230,12 @@ par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n            
 par_button ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_button:n              {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_button:n                      {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
                                                                                         { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                        else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                        else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                         parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n                {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_button:n                      {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
                                                                                         { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                         else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                         else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                         parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_button:n            {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n           {: parInput += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
@@ -254,43 +248,43 @@ par_areatext ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n  
     | CORIN FILA IGUAL COMILLA NUMENTERO:tp COMILLA COROUT par_areatext:n           {:RESULT = "  rows=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n                {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
                                                                                     { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n                {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
                                                                                     { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_areatext:n      {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | MAQ MEQ DIVISION                                                                {:RESULT = "> </"; :}
     ;
 
 parm_shisp ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n      {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :} 
-    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_shisp:n        {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_shisp:n        {:     RESULT = "  " + n.toString(); parInput += " color: " + tp.toString() + "; "; :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n              {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
-                                                                                parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
+                                                                                {     RESULT = "  " + n.toString();  parInput += " text-align: " + tp.getLexema() + "; "; }
+                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
+                                                                                    RESULT = "  " + n.toString(); }  parInput += " text-align: " + tp.getLexema() + "; ";:}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n              {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
-                                                                                parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_shisp:n    {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+                                                                                {     RESULT = "  " + n.toString(); parInput += " font-family: " + tp.getLexema() + "; "; }
+                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
+                                                                                    RESULT = "  " + n.toString(); }  parInput += " font-family: " + tp.getLexema() + "; "; :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_shisp:n    {:    RESULT = "  " + n.toString();  parInput += " font-size: " + tp.toString() + "; ";  :}
     | MAQ:tp                                                                    {:RESULT = tp.getLexema(); :}
     ;
 
 parm_input ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n      {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN TYPE IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n                {: if(tp.getLexema().equals("text") || tp.getLexema().equals("number") || tp.getLexema().equals("radio") || tp.getLexema().equals("checkbox"))
                                                                                 { RESULT = "  type=\"" + tp.getLexema() + "\"  " + n.toString(); }
-                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                 RESULT = "  type=\"text\"  " + n.toString(); } :}   
     | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_input:n        {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n              {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
                                                                                 { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                 parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n              {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
                                                                                 { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", n.getLexema(), n.getLine(), n.getColumna())); 
+                                                                                else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                 parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_input:n    {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | MAQ:tp                                                                    {:RESULT = tp.getLexema(); :}
@@ -325,7 +319,7 @@ exp_cadenatext ::= CADENA:tp exp_cadenatext:n           {:RESULT = tp.getLexema(
     | MEQ:tp DIVISION:n                                 {:RESULT = tp.getLexema() + n.getLexema(); :}
     ;
 
-exp_opciones ::= MEQ OPTION MAQ exp_cadenatext:tp  OPTION MAQ exp_opciones:n {:RESULT = " <option> "+ tp.getLexema()+ "option>  " + n.toString(); :}
+exp_opciones ::= MEQ OPTION MAQ exp_cadenatext:tp  OPTION MAQ exp_opciones:n {:RESULT = " <option> "+ tp.toString()+ "option>  " + n.toString(); :}
     | MEQ:tp DIVISION:n                                                     {:RESULT = tp.getLexema() + n.getLexema(); :}
     ;
 
@@ -358,39 +352,39 @@ par_heigtwith ::= NUMENTERO:tp ID:n     {: if(n.getLexema().equals("px")){ RESUL
 exp_script ::= MEQ SCRIPT MAQ exp_funciones:tp                                      {:RESULT = "  <script> " + tp.toString(); :}
     ;
 
-exp_funciones ::= LOAD PARIN PAROUT CORIN instrucciones:tp exp_funciones:n          {:RESULT = tp.toString()+" " + n.toString(); :}
-    | PROCESOS:tp PARIN:n PAROUT:e CORIN instrucciones:e1 exp_funciones:e2          {:RESULT = " function  " tp.getLexema() + n.getLexema() + e.getLexema() + e1.toString() + e2.toString(); :}
+exp_funciones ::= LOAD PARIN PAROUT CORIN instrucciones:tp exp_funciones:n          {:RESULT = " \n { \n"+ tp.toString()+" " + n.toString(); :}
+    | PROCESOS:tp PARIN:n PAROUT:e CORIN instrucciones:e1 exp_funciones:e2          {:RESULT = " function  " + tp.getLexema() + n.getLexema() + e.getLexema() + " { " + e1.toString() + e2.toString(); :}
     | MEQ DIVISION SCRIPT MAQ                                                       {:RESULT = "  </script>"; :}
     ;
 
 instrucciones ::= exp_variables:tp instrucciones:n                        {:RESULT = tp.toString()+ " \n " + n.toString(); :}
-    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones:e2      {:RESULT = " alert" tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +" " +  e2.toString(); :} 
-    | EXIT PARIN PAROUT PUNTOCOMA instrucciones:tp                        {:RESULT = "  return: " +  tp.toString(); :} 
-    | IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2 instrucciones:e3       {:
-                                                                                RESULT = "  if" tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
+    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones:e2      {:RESULT = " alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +"\n " +  e2.toString(); :} 
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones:tp                        {:RESULT = "  return; " +  tp.toString(); :} 
+    | IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2 instrucciones:e3      {:
+                                                                                RESULT = "  if" + tp.getLexema() + n.toString() + e.getLexema() + "  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | REPEAT PARIN:tp condiciones_repeat:n PAROUT HUNTIL PARIN limit_repeat:e PAROUT INIT LLAVEIN:e1 DOSP instrucciones_intro:e2 instrucciones:e3       {:
                                                                                 RESULT = "  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | WHILE PARIN:tp condiciones:n  THENWHILE INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones:e2       {:
-                                                                                RESULT = "  while" tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
+                                                                                RESULT = "  while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
     | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones:n                      {:RESULT = " var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
                                                                                     "\n contenedor.innerHTML = " + tp.toString() + " " + n.toString(); :}
     | COROUT                                                                {:RESULT = " }"; :}
-    | error instrucciones
+    | error instrucciones                                               {:System.out.println("error sintactico"); :}
     ;
 
 instrucciones_intro ::= exp_variables:tp instrucciones_intro:n                 {:RESULT = tp.toString()+ " \n " + n.toString(); :}
-    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones_intro:e2     {:RESULT = " alert" tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +" " +  e2.toString(); :} 
-    | EXIT PARIN PAROUT PUNTOCOMA instrucciones_intro:tp                       {:RESULT = "  return: " +  tp.toString(); :}   
+    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones_intro:e2     {:RESULT = " alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +" " +  e2.toString(); :} 
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones_intro:tp                       {:RESULT = "  return; " +  tp.toString(); :}   
     | IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2 instrucciones_intro:e3     {:
-                                                                                RESULT = "  if" tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
+                                                                                RESULT = "  if" + tp.getLexema() + n.toString() + e.getLexema() + "  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | REPEAT PARIN:tp condiciones_repeat:n PAROUT HUNTIL PARIN limit_repeat:e PAROUT INIT LLAVEIN:e1 DOSP instrucciones_intro:e2 instrucciones_intro:e3    {:
                                                                                 RESULT = "  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | WHILE PARIN:tp condiciones:n  THENWHILE INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_intro:e2     {:
-                                                                                RESULT = "  while" tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
+                                                                                RESULT = "  while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
     | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones_intro:n                {:RESULT = " var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
                                                                                     "\n contenedor.innerHTML = " + tp.toString() + " " + n.toString(); :}
     | DOSP LLAVEOUT:tp END                                                     {:RESULT = " " + tp.getLexema(); :}
-    | error instrucciones_intro
+  //  | error instrucciones_intro                                           {:System.out.println("error sintactico"); :}
     ;
 
 condiciones ::= NOT:tp condiciones:n        {:RESULT = tp.getLexema()+ n.toString(); :}
@@ -401,11 +395,7 @@ exp_conds ::=  signo_condicion:tp exp_condicion:n oper_cond:e   {:RESULT = tp.to
     |  oper_cond:tp                                         {:RESULT = tp.toString(); :}     
     ;
 
-exp_condicion ::= BOOLEANOS:tp              {:  if(tp.getLexema().equals("true")) { RESULT = tp.getLexema();
-                                       } else if(tp.getLexema().equals("false")) { RESULT = tp.getLexema(); } else {
-                                         errorSemantico.add(String.format("Error sintactico con el lexema: %s  linea: %d  columna: %d. se esperaba true o false", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                                         RESULT = tp.getLexema();
-                                        }  :}      
+exp_condicion ::= BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}      
     | limit_repeat:tp                       {:RESULT = tp.toString(); :}
     | COMILLA:tp ID:n COMILLA:e             {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
     | COMILLA:tp CADENA:n COMILLA:e         {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
@@ -425,9 +415,9 @@ signo_condicion ::= IGUAL:tp IGUAL:n        {:RESULT = tp.getLexema() + n.getLex
     ;
 
 instrucciones_if ::= ELSE IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2  {:
-                                                            RESULT = "else if" tp.getLexema() + n.toString() + e.getLexema() + "\n"+ e1.toString() + e2.toString(); :}
-    | ELSE INIT LLAVEIN:tp DOSP instrucciones_intro:n   {:RESULT = " \n else " tp.getLexema() + " \n" + n.toString(); :}
-    | /*LAMBDA*/                                        {:RESULT = ""; :}
+                                                            RESULT = "else if" + tp.getLexema() + n.toString() + e.getLexema() + "\n"+ e1.toString() + e2.toString(); :}
+    | ELSE INIT LLAVEIN:tp DOSP instrucciones_intro:n   {:RESULT = " \n else " + tp.getLexema() + " \n" + n.toString(); :}
+    | /*lambda*/                                        {:RESULT = "\n"; :}
     ;
 
 limit_repeat ::= numeros:tp SUMA:n limit_repeat:e           {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
@@ -446,7 +436,7 @@ expr_numerica ::= SUMA:tp limit_repeat:n        {:RESULT = tp.getLexema()+" " + 
     ;
 
 condiciones_repeat ::= ID:tp IGUAL:n numeros:e  {: varIdFor = tp.getLexema();  RESULT = tp.getLexema() +" " + n.getLexema() +" " + e.toString(); :}
-    | ENTERO ID:tp IGUAL:n numeros:e            {: varIdFor = tp.getLexema();  RESULT = " let " tp.getLexema() +" " + n.getLexema() +" " + e.toString(); :}
+    | ENTERO ID:tp IGUAL:n numeros:e            {: varIdFor = tp.getLexema();  RESULT = " let " + tp.getLexema() +" " + n.getLexema() +" " + e.toString(); :}
     ;
 
 numeros ::= NUMENTERO:tp                    {:RESULT = tp.getLexema(); :}
@@ -487,10 +477,7 @@ dat_boolean ::= BOOLEANOS:tp            {:  if(tp.getLexema().equals("true")) { 
                                          errorSemantico.add(String.format("Error sintactico con el lexema: %s  linea: %d  columna: %d. se esperaba true o false", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :} 
-    | ID:tp                             {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT = tp.getLexema(); :}
+    | ID:tp                             {:  RESULT = tp.getLexema(); :}
     ;
 
 exp_oper_bool ::= OR:tp dat_boolean:n exp_oper_bool:e           {:RESULT = tp.getLexema() + n.toString() + " " + e.toString(); :}
@@ -503,7 +490,7 @@ exp_oper_bool ::= OR:tp dat_boolean:n exp_oper_bool:e           {:RESULT = tp.ge
 
 exp_string ::= IGUAL:tp dato_string:n exp_oper_string:e         {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
     | COMA:tp ID:n exp_string:e                                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
-    | IGUAL:tp GETID:n PARIN:e APOSTROFO:e1 ID:e2 APOSTROFO:e3 PAROUT:e4 exp_oper_string:e5  {:RESULT = tp.getLexema()+n.getLexema()+e.getLexema()+e1.getLexema() + e2.getLexema()+e3.getLexema() + e4.getLexema()+ e5.toString(); :}
+    | IGUAL:tp GETID:n PARIN:e APOSTROFO:e1 ID:e2 APOSTROFO:e3 PAROUT:e4 exp_oper_string:e5  {:RESULT = tp.getLexema()+ " document.getElementById" +e.getLexema()+e1.getLexema() + e2.getLexema()+e3.getLexema() + e4.getLexema()+ ".value"+ e5.toString(); :}
     | IGUAL:tp exp_funciones_especial:n exp_oper_string:e       {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
     | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
     ;
@@ -515,7 +502,7 @@ exp_funciones_especial ::= ASCF:tp PARIN:n par_function_esp:e PAROUT:e1     {:RE
     | REVERSEF:tp PARIN:n par_function_esp:e PAROUT:e1                      {:RESULT = tp.getLexema() + n.getLexema() + e.toString() + e1.getLexema(); :}
     ;
 
-par_function_esp ::= ID:tp              {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
+par_function_esp ::= ID:tp              {:  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
@@ -532,10 +519,7 @@ dato_string ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
     | CARACTER:tp                   {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
     | COMILLA:tp text_string:n      {:RESULT = tp.getLexema() + n.toString(); :}
-    | ID:tp                     {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT = tp.getLexema(); :}
+    | ID:tp                         {:  RESULT = tp.getLexema(); :}
     ;
 
 exp_char ::= IGUAL:tp CARACTER:n dat_char:e                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
@@ -568,8 +552,8 @@ dato_entero ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
                                          errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :}
-    | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);int asciiValue = as;  RESULT = asciiValue; :}
-    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
+    | CARACTER:tp                   {: char as = tp.getLexema().charAt(1); int asciiValue = as;  RESULT = asciiValue; :}
+    | ID:tp                          {:  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
@@ -590,26 +574,26 @@ exp_oper_decimal ::= SUMA:tp dato_decimal:n exp_oper_decimal:e     {:RESULT = tp
 
 dato_decimal ::= NUMENTERO:tp       {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
-    | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = 1;
-                                       } else if(tp.getLexema().equals("false")) { RESULT = 0; } else {
+    | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = "1";
+                                       } else if(tp.getLexema().equals("false")) { RESULT = "0"; } else {
                                          errorSemantico.add(String.format("Error sintactico no se esperaba el lexema: %s  linea: %d  columna: %d. se esperaba un true o false.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :}
-    | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);int asciiValue = as;  RESULT = asciiValue; :} 
-    | ID:tp                          {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
+    | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);  int asciiValue = as;  RESULT = asciiValue; :} 
+    | ID:tp                          {:  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT = tp.getLexema(); :}
     ;
 
-par_insert ::= ID:tp par_insert1:n       {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+par_insert ::= ID:tp par_insert1:n       {:  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               }  RESULT =  tp.getLexema() + n.toString(); :}
-    | APOSTROFO:tp texto_insert:e  par_insert1:n   {:RESULT = " + " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
+    | APOSTROFO:tp texto_insert:e  par_insert1:n   {:RESULT = "  " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
     ;
 
-par_insert1 ::= COMA ID:tp par_insert1:n     {:  if(tablaSimbolo.existeId(tp.getLexema(), ListTablaSimbol)) { System.out.println("si existe id");
+par_insert1 ::= COMA ID:tp par_insert1:n     {:  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
                               } else {
                                   errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                               } RESULT = " + " + tp.getLexema() + n.toString(); :}
@@ -622,23 +606,20 @@ texto_insert ::=  mensaje_texto:n            {:RESULT =  n.toString(); :}
     ;
 
 
-texto_etiqueta ::= MEQ SPAM parm_shisp:p exp_cadenatext:n  SPAM MAQ  {:RESULT = "<spam " + p.toString()+"> " + n.toString() + "</spam>"; :}    
-    | MEQ SELECTED parm_shisp:p exp_opciones:n  SELECTED MAQ  {:RESULT = "<select " + p.toString()+"> " + n.toString() + "</select>"; :} 
-    | MEQ H1 parm_shisp:p exp_cadenatext:n  H1 MAQ          {:RESULT = "<h1 " + p.toString()+"> " + n.toString() + "</h1>"; :} 
-    | MEQ P parm_shisp:p exp_cadenatext:n  P MAQ            {:RESULT = "<p " + p.toString()+"> " + n.toString() + "</p>"; :}    
-    | MEQ BR MAQ                                            {:RESULT = "<br>"; :}
-    | MEQ INPUT parm_input:p exp_cadenatext:n  INPUT MAQ    {:RESULT = "<input " + p.toString()+"> " + n.toString() + "</input>"; :}
-    | MEQ IMG parm_image:p MEQ DIVISION IMG MAQ             {:RESULT = "<img " + p.toString()+"> " + "</img>"; :}
-    | MEQ TEXTAREA par_areatext:p TEXTAREA MAQ              {:RESULT = "<textarea " + p.toString()+"> " + "</textarea>"; :}
-    | MEQ DIV par_div:p contenido_div:n DIV MAQ             {:RESULT = "<div " + p.toString()+"> " + n.toString() + "</div>"; :}
-    | MEQ BUTTON par_button:p  exp_cadenatext:n BUTTON MAQ  {:RESULT = "<button " + p.toString()+"> " + n.toString() + "</button>"; :}
+texto_etiqueta ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  "; :}    
+    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ         {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<select "+ styl + tp.toString()+" " + n.toString() + "select>  "; :} 
+    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ                   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  "; :}
+    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ                     {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<p "+ styl + tp.toString()+" " + n.toString() + "p>  "; :} 
+    | MEQ BR MAQ                                                      {: RESULT = " <br> "; :}
+    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ             {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<input "+ styl + tp.toString()+" " + n.toString() + "input>  "; :}
+    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<img "+ styl + tp.toString()+" " + "</img>  "; :}
+    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ                       {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<textarea "+ styl + tp.toString()+" " +  "textarea>  "; :}
+    | MEQ DIV par_div:tp contenido_div:n DIV MAQ                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<div "+ styl + tp.toString()+" " + n.toString() + "  "; :}
+    | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<button "+ styl + tp.toString()+" " + n.toString() + "button>  "; :}
     ;
 
-texto ::= ID:tp                {:  if(tablaSimbolo.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }RESULT = tp.getLexema(); :}
-    | APOSTROFO:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+texto ::= ID:tp                {:  RESULT = tp.getLexema(); :}
+    | COMILLA:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
     ;
 
 mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -657,18 +638,18 @@ mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " +
     | APOSTROFO:tp                               {:RESULT = tp.getLexema(); :}
     ;
 
-text_string ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | ID:tp mensaje_texto:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | NUMENTERO:tp mensaje_texto:n               {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | NUMDECIMAL:tp mensaje_texto:n              {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | SUMA:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | RESTA:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | PRODUCTO:tp mensaje_texto:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | DIVISION:tp mensaje_texto:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | DOSP:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | COMA:tp mensaje_texto:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | IGUAL:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | PARIN:tp mensaje_texto:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | PAROUT:tp mensaje_texto:n                  {:RESULT = tp.getLexema()+" " + n.toString(); :}
+text_string ::= CADENA:tp text_string:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | ID:tp text_string:n                      {:RESULT = tp.getLexema()+"" + n.toString(); :}
+    | NUMENTERO:tp text_string:n               {:RESULT = tp.getLexema()+"" + n.toString(); :}
+    | NUMDECIMAL:tp text_string:n              {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | SUMA:tp text_string:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | RESTA:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PRODUCTO:tp text_string:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DIVISION:tp text_string:n                {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | DOSP:tp text_string:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | COMA:tp text_string:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | IGUAL:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PARIN:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+    | PAROUT:tp text_string:n                  {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | COMILLA:tp                               {:RESULT = tp.getLexema(); :}
     ;

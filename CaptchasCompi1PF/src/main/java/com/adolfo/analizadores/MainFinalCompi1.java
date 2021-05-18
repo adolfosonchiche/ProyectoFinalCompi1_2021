@@ -21,14 +21,14 @@ public class MainFinalCompi1 {
     public static void main(String[] args) {
         // TODO code application logic here
         //System.out.println("es el CARMEN TE AMO " + String.valueOf(as));
-        String dat = "'a'";
+        /*String dat = "'a'";
         char as = dat.charAt(1);
- int asciiValue = as;
-        System.out.println("es el assci " + asciiValue);
+ int asciiValue = as;*/
+        //System.out.println("es el assci " + asciiValue);
         String entrada = "<!-- Mi primer captcha\n" +
 "en el curso de Organización de Lenguajes y Compiladores 1\n" +
 "-->\n" +
-"<C_GCIC [id= \"captcha_matematico_1\"] [id= \"captcha_matematico_1\"] [name= \"Captcha Matemático 1\"]>\n" +
+"<C_GCIC [id= \"captcha_matematico_1\"] [name= \"Captcha Matemático 1\"]>\n" +
 "!! El encabezado de la página que tendrá mi captcha\n" +
 "<C_hEAd>\n" +
 "<C_LINK\n" +
@@ -63,6 +63,7 @@ public class MainFinalCompi1 {
 "<C_BUTTON [id= \"boton_1\"] [onclick= \"PROCESS_calc()\"] [background=\"green\"]>\n" +
 "Procesar...\n" +
 "</C_BUTTON>\n" +
+           
 "!! Scripting para la función calc\n" +
 "<C_SCRIPTING>\n" +
 "PROCESS_calc() [\n" +
@@ -98,7 +99,7 @@ public class MainFinalCompi1 {
 "</C_GcIC>\n" +
 "\n" +
 "\n" +
-"!!Fin de estructura GCIC \n \n"; /*"@@@ @@@ <!-- Mi primer captcha\n"
+"!!Fin de estructura GCIC  \n"; /*"@@@ @@@ <!-- Mi primer captcha\n"
                 + "en el curso de Organización de Lenguajes y Compiladores 1\n"
                 + "-->\n"
                 + "<     C_GcIC [id= \"captcha_matematico_1\"] [name= \"Captcha Matemático 1\"]>\n"
@@ -162,7 +163,7 @@ public class MainFinalCompi1 {
         try {
             pa.parse();
 
-             for (int i = 0; i < lexico.getErrorList().size(); i++) {
+             /*for (int i = 0; i < lexico.getErrorList().size(); i++) {
                 System.out.println("" + lexico.getErrorList().get(i));
             }
 
@@ -177,10 +178,9 @@ public class MainFinalCompi1 {
                             + "  parametros " + pa.getDatosList().get(i).getParametros());
                 }
             }*/
-            System.out.println("");
 
         } catch (Exception e) {
-            System.out.println("Error irrecuperable.. falta la etiqueta de cierre: </C_Gcic>" + e);
+            System.out.println("Error irrecuperable.. " + e);
 
         }
 

@@ -18,7 +18,7 @@ en el curso de Organización de Lenguajes y Compiladores 1
 Mi primer Captcha Matemático
 </C_H1>
 !! Un salto normal
-<br>
+<c_br>
 !! Información de la operación a resolver en el captcha
 <C_SPAM [id= "mostrar_1"] [text-align= "center"] [color= "#3366ff"] >
 ¿ Qué resultado genera la operación siguiente: 5+5 ?
@@ -29,8 +29,7 @@ ON_LOAD () [
 !!Estas instrucciones se ejecutan media vez se entra al scripting
 !! Insertamos el input con sus parámetros con la instrucción INSERT
 INSERT('<C_INPUT [type= "text"] [text-align= "center"]
-[id= "entrada_1"] >');
-INSERT('</C_INPUT>');
+[id= "entrada_1"] > </C_INPUT>');
 ]
 </C_SCRIPTING>
 !! Boton que llama a la funcionalidad calc
@@ -64,7 +63,7 @@ ELSE
 
 INIT {:
 ALERT_INFO(mensaje_fallo);
-contador_fallas = contador_fallas -1;
+contador_fallas = contador_fallas - 1;
 :} END
 ]
 </C_SCRIPTING>
@@ -73,17 +72,3 @@ contador_fallas = contador_fallas -1;
 
 
 !!Fin de estructura GCIC
-
-"¿ Carmen//()000 "
-
-10%
-
-cols
-class
-rows
-id
-center
-left
-arial
-radio
-string

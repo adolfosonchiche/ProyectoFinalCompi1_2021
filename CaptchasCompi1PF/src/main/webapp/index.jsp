@@ -4,7 +4,8 @@
     Author     : hectoradolfo
 --%>
 
-<%@page import="javax.swing.JOptionPane"%>
+<%@page import="com.adolfo.captchascompi1pf.AnalizarCodigo"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -16,13 +17,13 @@
         <title>compi_1</title>
     </head>
     <body bgcolor="#A5F4EF">
-
+ <% 
+               AnalizarCodigo analizar = new AnalizarCodigo();
+        %>
 
         <div ALIGN="CENTER" ><h2 ALIGN="CENTER" > Compilador Captchas</h2></div>
-        <%
-        %>
+       
         <form method="#">
-
             <br><label class="label">AREA DE CODIGO</label><br>
             <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="140"
                        placeholder="escribe el codigo C_GCIC aqui..."required></textarea>
@@ -53,47 +54,43 @@
                                 reader.readAsText(file);
 
                     }
-
-
                 }
                 document.getElementById('file').addEventListener('change', handleFileSelect, false);
 
             </script>
-
-
             <br>
-
-
         </form>
 
-        <%
+        <% try {
             if (request.getParameter("entrar") != null) {
 
-                String nomUser = request.getParameter("area");
+                String codigo = request.getParameter("area");
 
-                //     <br><input type="submit" value="compilar" name="entrar" />
-                try {
-                    //out.write("DATOS: \n" + nomUser);
+              
+                   String datos = analizar.crearCaprcha(codigo);
 
         %>
         <br><label class="label">SALIDA</label><br>
-        <textarea class="example-full-width" name="textarea" rows="20" cols="140" readonly><%=nomUser%></textarea><br>
-        <%
+        <textarea class="example-full-width" name="textarea" rows="20" cols="140" readonly><%=datos %></textarea><br>
+        <% }%>
+        <%@ include file = "menu.jsp" %>
 
-                } catch (Exception e) {
-                    out.write("error: \n" + e);
-                }
-
-            }
-
-            if (request.getParameter("cerrar") != null) {
-                session.invalidate();
-            }
-
+        <h1>Lista de Captchas</h1>
+        <form Method="GET" action="/ControladorPrincipal">
+            <table border="5" width="700">
+                <tr>
+                    <th>ID captchas</th>
+                </tr>
+                <c:forEach items="${captcha}" var="cp">
+                    <tr>
+                        <td>${cp.id}</td>
+                        <td><a href="${pageContext.request.contextPath}/ControladorForm?captcha=${cp.id}">Generar Link</a></td>
+                    </tr>
+                </c:forEach>
+            </table>
+<% 
+} catch(Exception e){}
         %>
-
-
-
 
     </body>
 </html>

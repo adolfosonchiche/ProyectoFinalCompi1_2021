@@ -59,7 +59,7 @@ private int lineErr = 0, columnErr = 0;
     private Symbol symbol(int type, String lexeme) {
         //System.out.printf("Token tipo %d, lexeme %s, en linea %d, columna %d\n", type, lexeme == null ? "" : lexeme, yyline + 1, yycolumn + 1);
         if(type == ID){
-          System.out.println("VIIIIDAAAALLLIAAA" + type);
+          //verificar ids
         }
         return new Symbol(type, new Token(lexeme, yyline, yycolumn + 1));
     }
