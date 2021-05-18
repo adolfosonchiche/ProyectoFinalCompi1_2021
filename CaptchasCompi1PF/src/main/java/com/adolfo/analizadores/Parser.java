@@ -1716,6 +1716,8 @@ public class Parser extends java_cup.runtime.lr_parser {
     private EtiquetaId etiquetaId;
     private TablaSimbolo tablaSimbolo;
     private String parInput = "style=\"";
+    private String parShipsp = "style=\"";
+    private String parDiv = "style=\"";
     private int parId = 0, parName = 0;
     int asd;
 
@@ -1748,7 +1750,7 @@ public class Parser extends java_cup.runtime.lr_parser {
     public void syntax_error(Symbol st) {
        Token token = (Token) st.value;
       
-                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token. (verificar toda la linea)", token.getLexema(), token.getLine(), token.getColumna()));
              
         //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
 
@@ -2386,7 +2388,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); 
+		  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2404,7 +2406,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); 
+		  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2422,7 +2424,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); 
+		  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2440,7 +2442,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); 
+		  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2485,7 +2487,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); 
+		  String styl = "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2518,7 +2520,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); 
+		  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("exp_contenido",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2695,7 +2697,7 @@ class CUP$Parser$actions {
 		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object e = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); 
+		  String styl =   "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("contenido_div",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2783,9 +2785,9 @@ class CUP$Parser$actions {
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                    { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { parDiv += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
+                                                                                    parDiv += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2800,7 +2802,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
+		 parDiv += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2816,9 +2818,9 @@ class CUP$Parser$actions {
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                    { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { parDiv += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
+                                                                                    parDiv += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2833,7 +2835,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
+		 parDiv += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2848,7 +2850,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		 parInput += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
+		 parDiv += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2864,9 +2866,9 @@ class CUP$Parser$actions {
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
-                                                                                    { parInput += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parInput += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
+                                                                                    parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_div",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3136,7 +3138,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		     RESULT = "  " + n.toString(); parInput += " color: " + tp.toString() + "; "; 
+		     RESULT = "  " + n.toString(); parShipsp += " color: " + tp.toString() + "; "; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("parm_shisp",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3152,9 +3154,9 @@ class CUP$Parser$actions {
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                {     RESULT = "  " + n.toString();  parInput += " text-align: " + tp.getLexema() + "; "; }
+                                                                                {     RESULT = "  " + n.toString();  parShipsp += " text-align: " + tp.getLexema() + "; "; }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    RESULT = "  " + n.toString(); }  parInput += " text-align: " + tp.getLexema() + "; ";
+                                                                                    RESULT = "  " + n.toString(); }  parShipsp += " text-align: " + tp.getLexema() + "; ";
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("parm_shisp",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3170,9 +3172,9 @@ class CUP$Parser$actions {
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		 if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                {     RESULT = "  " + n.toString(); parInput += " font-family: " + tp.getLexema() + "; "; }
+                                                                                {     RESULT = "  " + n.toString(); parShipsp += " font-family: " + tp.getLexema() + "; "; }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    RESULT = "  " + n.toString(); }  parInput += " font-family: " + tp.getLexema() + "; "; 
+                                                                                    RESULT = "  " + n.toString(); }  parShipsp += " font-family: " + tp.getLexema() + "; "; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("parm_shisp",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -3187,7 +3189,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		    RESULT = "  " + n.toString();  parInput += " font-size: " + tp.toString() + "; ";  
+		    RESULT = "  " + n.toString();  parShipsp += " font-size: " + tp.toString() + "; ";  
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("parm_shisp",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-7)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -5423,10 +5425,7 @@ class CUP$Parser$actions {
 		int tpleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int tpright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token tp = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT = tp.getLexema(); 
+		 RESULT = tp.getLexema(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_function_esp",49, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -5880,10 +5879,7 @@ class CUP$Parser$actions {
 		int tpleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int tpright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token tp = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT = tp.getLexema(); 
+		   RESULT = tp.getLexema(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("dato_entero",40, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -6097,10 +6093,7 @@ class CUP$Parser$actions {
 		int tpleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int tpright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token tp = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT = tp.getLexema(); 
+		  RESULT = tp.getLexema(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("dato_decimal",42, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -6115,10 +6108,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              }  RESULT =  tp.getLexema() + n.toString(); 
+		   RESULT =  tp.getLexema() + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_insert",32, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -6151,10 +6141,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		  if(etiquetaId.existeId(tp.getLexema(), listIdVar)) { System.out.println("si existe id");
-                              } else {
-                                  errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
-                              } RESULT = " + " + tp.getLexema() + n.toString(); 
+		  RESULT = " + " + tp.getLexema() + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("par_insert1",33, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -6631,7 +6618,7 @@ class CUP$Parser$actions {
 		int nleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int nright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object n = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		RESULT = tp.getLexema()+"" + n.toString(); 
+		RESULT = tp.getLexema()+" " + n.toString(); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("text_string",60, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;

@@ -62,6 +62,16 @@ public class CaptchasModel {
         }
 
     }
+    
+    public void saveChangedFileTableSymbol(String datoSave, String pat) {
+
+        try (PrintWriter printer = new PrintWriter(PATH + "/" + pat + ".id");) {
+            printer.print(datoSave);
+        } catch (FileNotFoundException ex) {
+            System.out.println("error: " + ex);
+        }
+
+    }
 
     public void crearCarpeta() {
         System.out.println(PATH);

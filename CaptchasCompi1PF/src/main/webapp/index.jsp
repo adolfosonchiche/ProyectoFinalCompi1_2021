@@ -4,7 +4,6 @@
     Author     : hectoradolfo
 --%>
 
-<%@page import="com.adolfo.captchascompi1pf.AnalizarCodigo"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -18,15 +17,14 @@
     </head>
     <body bgcolor="#A5F4EF">
  <% 
-               AnalizarCodigo analizar = new AnalizarCodigo();
         %>
 
         <div ALIGN="CENTER" ><h2 ALIGN="CENTER" > Compilador Captchas</h2></div>
        
-        <form method="#">
+        <form >
             <br><label class="label">AREA DE CODIGO</label><br>
             <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="140"
-                       placeholder="escribe el codigo C_GCIC aqui..."required></textarea>
+                       placeholder="escribe el codigo C_GCIC aqui..."required onfocus="this.innerHTML=''">${datos}</textarea>
             <br><br>
 
             <table border="4" width="600">
@@ -62,17 +60,17 @@
         </form>
 
         <% try {
-            if (request.getParameter("entrar") != null) {
+            //if (request.getParameter("entrar") != null) {
 
-                String codigo = request.getParameter("area");
+                //String codigo = request.getParameter("area");
 
               
-                   String datos = analizar.crearCaprcha(codigo);
+                   //String datos = analizar.crearCaprcha(codigo);
 
         %>
         <br><label class="label">SALIDA</label><br>
-        <textarea class="example-full-width" name="textarea" rows="20" cols="140" readonly><%=datos %></textarea><br>
-        <% }%>
+        <textarea class="example-full-width" name="textarea" rows="20" cols="140" readonly>${resultado}</textarea><br>
+        <% //}%>
         <%@ include file = "menu.jsp" %>
 
         <h1>Lista de Captchas</h1>
@@ -88,9 +86,31 @@
                     </tr>
                 </c:forEach>
             </table>
+            <h1>Tabla de variables</h1>
+            <table border="5" width="700">
+                <tr>
+                    <th>Id</th>
+                    <th>tipo</th>
+                    <th>Ambito</th>
+                    <th>Proceso</th>
+                    <th>Ejecucion</th>
+                </tr>
+                <c:forEach items="${listVar}" var="var">
+                    <tr>
+                        <td>${var.dato}</td>
+                        <td>${var.tipo}</td>
+                        <td>${var.modo}</td>
+                        <td>${var.proceso}</td>
+                        <td>${var.numEjecucion}</td><!--  -->
+                    </tr>
+                </c:forEach>
+            </table>
 <% 
 } catch(Exception e){}
         %>
 
+        
+        
+        
     </body>
 </html>
