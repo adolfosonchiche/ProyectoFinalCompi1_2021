@@ -207,7 +207,8 @@ contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_di
     | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ contenido_div:e                        {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
     | MEQ BUTTON par_button:tp  exp_cadenatext:n  BUTTON MAQ contenido_div:e           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
     | exp_script:tp contenido_div:n                                                    {:RESULT = tp.toString()+" " + n.toString(); :}
-    | MEQ DIVISION DIV MAQ                                                             {:RESULT = " </div>"; :}
+    | MEQ DIV par_div:tp contenido_div:n DIV MAQ contenido_div:e                             {:  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
+    | MEQ DIVISION                                                              {:RESULT = " </div>"; :}
     ;
 
 par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
@@ -222,7 +223,7 @@ par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n            
                                                                                     parDiv += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_div:n           {: parDiv += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
     | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n          {: parDiv += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
-    | CORIN CLASE IGUAL COMILLA ID:tp COROUT par_div:n                              {: if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
+    | CORIN CLASE IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                              {: if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
                                                                                     { parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
@@ -552,6 +553,7 @@ dato_entero ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
                                          RESULT = tp.getLexema();
                                         }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1); int asciiValue = as;  RESULT = asciiValue; :}
+    | PARIN:tp limit_repeat:n PAROUT:e      {:RESULT = tp.getLexema() + n.toString() + e.getLexema();  :}
     | ID:tp                          {:   RESULT = tp.getLexema(); :}
     ;
 
@@ -576,11 +578,13 @@ dato_decimal ::= NUMENTERO:tp       {:RESULT = tp.getLexema(); :}
                                          RESULT = tp.getLexema();
                                         }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);  int asciiValue = as;  RESULT = asciiValue; :} 
+    | PARIN:tp limit_repeat:n PAROUT:e      {:RESULT = tp.getLexema() + n.toString() + e.getLexema();  :}
     | ID:tp                          {:  RESULT = tp.getLexema(); :}
     ;
 
 par_insert ::= ID:tp par_insert1:n       {:   RESULT =  tp.getLexema() + n.toString(); :}
     | APOSTROFO:tp texto_insert:e  par_insert1:n   {:RESULT = "  " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
+    | CARACTER:tp par_insert1:n                     {:   RESULT =  tp.getLexema() + n.toString(); :}
     ;
 
 par_insert1 ::= COMA ID:tp par_insert1:n     {:  RESULT = " + " + tp.getLexema() + n.toString(); :}

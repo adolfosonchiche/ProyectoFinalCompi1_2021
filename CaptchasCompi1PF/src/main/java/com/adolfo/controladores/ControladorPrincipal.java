@@ -40,7 +40,14 @@ public class ControladorPrincipal extends HttpServlet {
 
                 try {
                     pa.parse();
-                    if (lexico.getErrorList().size() > 0 || pa.getErrorSintactico().size() > 0) {
+                    } catch (Exception e) {
+                    this.resultado = "Error irrecuperable... " + e;
+                    System.out.println("Error irrecuperable.. " + e);
+
+                }
+                try {
+                    
+                    if ( pa.getErrorSintactico().size() > 0) {
                         this.resultado = "Se encontraron errores: \n";
                         for (int i = 0; i < lexico.getErrorList().size(); i++) {
                             resultado += lexico.getErrorList().get(i) + "\n";
@@ -69,7 +76,7 @@ public class ControladorPrincipal extends HttpServlet {
                     }
 
                 } catch (Exception e) {
-                    this.resultado += "Error irrecuperable... " + e;
+                    this.resultado = "Error irrecuperable... " + e;
                     System.out.println("Error irrecuperable.. " + e);
 
                 }

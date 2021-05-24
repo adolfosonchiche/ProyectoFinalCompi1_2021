@@ -24,7 +24,8 @@
         <form >
             <br><label class="label">AREA DE CODIGO</label><br>
             <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="140"
-                       placeholder="escribe el codigo C_GCIC aqui..."required onfocus="this.innerHTML=''">${datos}</textarea>
+                       placeholder="escribe el codigo C_GCIC aqui..."
+                       required onfocus="this.innerHTML">${datos}</textarea>
             <br><br>
 
             <table border="4" width="600">

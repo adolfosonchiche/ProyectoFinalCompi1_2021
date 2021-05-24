@@ -40,7 +40,7 @@ HEXADECIMAL = #[0-9a-fA-F0]{6}
 //CADENACOMILLA = [\"]([^\"]|(\\\")[.])*[\"]
 //CADENA = ([^|[ \n] ])+
 PROCESOS = "PROCESS_"{ID}
-CADENA = ([A-Za-zñÑáéíóúÁÉÍÓÚ]*[¡¿?%\.]*)+[0-9_]*
+CADENA = ([A-Za-zñÑáéíóúÁÉÍÓÚ]*[¡¿?%.]*)+[0-9_]*
 
 
 %{
