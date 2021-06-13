@@ -118,24 +118,24 @@ public class MainFinalCompi1 {
 "               !! Validacion del numero de oportunidades restantes\n" +
 "               IF (intentos == limite) THEN\n" +
 "                  INIT {:\n" +
-"                     ALERT(mensaje_final);\n" +
+"                     ALERT_INFO(mensaje_final);\n" +
 "                     EXIT();\n" +
 "                  :} END \n" +
 "\n" +
 "               !! Validación de fallas y aciertos\n" +
 "               IF (result_caja_texto == result_cercano ) THEN\n" +
 "                  !!si el resultado es cercano no le descontamos el intento\n" +
-"                  ALERT(mensaje_cercano);\n" +
+"                  ALERT_INFO(mensaje_cercano);\n" +
 "               ELSE IF (result_caja_texto == result_bueno ) THEN\n" +
 "                  !!El resultado es el esperado\n" +
 "                  INIT {:\n" +
-"                     ALERT(mensaje_acierto);\n" +
+"                     ALERT_INFO(mensaje_acierto);\n" +
 "                  !!puede usarse también EXIT() para redirigir \n" +
 "                  :} END    \n" +
 "               ELSE \n" +
 "                  !!si el intento es incorrecto\n" +
 "                  INIT {:\n" +
-"                     ALERT(mensaje_fallo);\n" +
+"                     ALERT_INFO(mensaje_fallo);\n" +
 "                     intentos = intentos + 1;\n" +
 "                  :} END\n" +
 "            ]\n" +

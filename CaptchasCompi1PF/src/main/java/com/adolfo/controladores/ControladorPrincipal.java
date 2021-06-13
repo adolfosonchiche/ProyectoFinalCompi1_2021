@@ -2,6 +2,7 @@ package com.adolfo.controladores;
 
 import com.adolfo.analizadores.Lexico;
 import com.adolfo.analizadores.Parser;
+import com.adolfo.analizadores.datos.EtiquetaId;
 import com.adolfo.captchascompi1pf.CaptchasModel;
 import java.io.IOException;
 import java.io.StringReader;
@@ -20,9 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 public class ControladorPrincipal extends HttpServlet {
 
     private String resultado;
+    private String captchaNuevo;
+    private EtiquetaId etiqueta = new EtiquetaId();
     private int num = 1;
-    CaptchasModel captchasModel = new CaptchasModel();
-    CaptchasModel form = new CaptchasModel();
+    private CaptchasModel form = new CaptchasModel();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -41,7 +43,7 @@ public class ControladorPrincipal extends HttpServlet {
                 try {
                     pa.parse();
                     } catch (Exception e) {
-                    this.resultado = "Error irrecuperable... " + e;
+                    this.resultado = "Error irrecuperable en el analisis sintactico... \n" + e;
                     System.out.println("Error irrecuperable.. " + e);
 
                 }
@@ -62,15 +64,21 @@ public class ControladorPrincipal extends HttpServlet {
 
                         System.out.println("ERRORES ");
                     } else {
+                        for (int i = 0; i < pa.getErroSemantico().size(); i++) {
+                            resultado += pa.getErroSemantico().get(i) + "\n";
+                        }
                         String idCpa = "";
-                        this.resultado = "El captcha se creo correctamente, ahora ya puede utilizarlo!!! ";
+                        this.resultado += "\nEl captcha se creo correctamente, ahora ya puede utilizarlo!!! ";
                         if (pa.getIdCaptcha().equals("")) {
                             idCpa = "nuevoCaptch" + num;
                         } else {
                             idCpa = pa.getIdCaptcha();
                         }
-                        this.captchasModel.saveChangedFileCaptchasId(idCpa);
-                        this.captchasModel.saveChangedFileCaptchas(pa.getCaptchaCreado(), idCpa);
+                       // String direcclink = etiqueta.scriptLinkRedirigir(pa.getLinkRedirigir());
+                        this.captchaNuevo = pa.getCaptchaCreado() + "\n " ;
+                        this.form.saveChangedFileCaptchasId(idCpa);
+                       // System.out.println(" \n" + this.captchaNuevo);
+                        this.form.saveChangedFileCaptchas(this.captchaNuevo, idCpa);
                         request.setAttribute("listVar", lexico.getListTablaSimbol());
 
                     }

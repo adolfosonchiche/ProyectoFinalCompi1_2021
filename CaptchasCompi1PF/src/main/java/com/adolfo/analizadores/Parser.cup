@@ -13,7 +13,7 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     //declaracion de variables
     private int filaErr = 0, columnErr = 0;
     private String datErr = "", varIdFor = "", lexErr = "", idCaptcha = "", namehtml = "", captchaCreado = "";
-    private String varscriptGlobal = "<script> \n";
+    private String varscriptGlobal = "<script> \n", linkRedirigir = "";
     private List<String> errorSintactico;
     private List<String> errorSemantico;
     private List<String> listIdEtiqueta;
@@ -56,12 +56,19 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     public void syntax_error(Symbol st) {
        Token token = (Token) st.value;
       
+      if(token.getLexema().compareTo("id") == 0 || token.getLexema().compareTo("integer") == 0 || token.getLexema().compareTo("string") == 0 || token.getLexema().compareTo("char") == 0 || token.getLexema().compareTo("decimal") == 0 || token.getLexema().compareTo("boolean") == 0
+            || token.getLexema().compareTo("INSERT") == 0 || token.getLexema().compareTo("WHILE") == 0 || token.getLexema().compareTo("IF") == 0 || token.getLexema().compareTo("REPEAT") == 0) {
+                                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta un punto y coma ", token.getLexema(), token.getLine(), token.getColumna()));
+               System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
+
+            } else {
                 errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token. (verificar toda la linea)", token.getLexema(), token.getLine(), token.getColumna()));
              
         //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
 
     System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
        // errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
+            }
     }
 
     protected int error_sync_size() {
@@ -81,6 +88,10 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
             return idCaptcha;
         }
 
+        public String getLinkRedirigir() {
+            return linkRedirigir;
+        }
+
     public List<LexemeId> getListTablaSimbol(){
 	        return ListTablaSimbol;
     }
@@ -95,7 +106,7 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
             ALT, ONCLICK, ENTERO, DECIMAL, BOOLEANO, CHAR, STRING, GLOBAL,
             IGUAL, MEQ, MAQ, OR, AND, NOT, SUMA, RESTA, PRODUCTO, DIVISION,
             CORIN, COROUT, PARIN, PAROUT, COMA, PUNTOCOMA, LLAVEIN, LLAVEOUT,
-            DOSP, LOAD, ASCF, DESCF, LETPF, LETIMF, REVERSEF, CARALEF, NUMALEF,
+            DOSP, LOAD, ASCF, DESCF, LETPF, LETIMF, REVERSEF, CARALEF, NUMALEF, REDIRECT,
             ALERTF, EXIT, GETID, INSERT, INIT, END, IF, ELSE, REPEAT, HUNTIL,
             THEN, WHILE, THENWHILE, COMILLA, APOSTROFO, PROCESOS, BOOLEANOS, ID,
             NUMENTERO, NUMDECIMAL, CARACTER, HEXADECIMAL, CADENA; 
@@ -112,13 +123,13 @@ non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp
             exp_opeinteger, dato_decimal, exp_oper_decimal, texto_insert, dat_char, 
             dato_string, exp_oper_string, exp_funciones_especial, par_function_esp, dat_boolean,
             exp_oper_bool, numeros, expr_numerica, signo_condicion, exp_condicion, oper_cond,
-            exp_conds, exp_dir, exp_oper_id, text_string;
+            exp_conds, exp_dir, exp_oper_id, text_string, exp_etiquetas_fin;
 
 
 /* Producciones siendo A el inicial*/
 start with exp_ini;
 
- exp_ini ::= MEQ HTML par_html:tp exp_head:n  {: captchaCreado += "<HTML  " + tp.toString() + "\n" + varscriptGlobal + "\n</script>\n"+ n.toString();
+ exp_ini ::= MEQ HTML par_html:tp exp_head:n  {: captchaCreado += etiquetaId.scriptLinkRedirigir(linkRedirigir) + "\n<HTML  " + tp.toString() + "\n" + varscriptGlobal + "\n</script>\n"+ n.toString();
                                                   System.out.println("vx " + captchaCreado);       :}
     | error exp_head                         {:System.out.println("error html en inicio");:}
     ;
@@ -149,7 +160,7 @@ exp_head ::= MEQ HEAD MAQ par_head:tp MEQ BODY par_body:n  exp_contenido:e     {
 
 
 par_head ::= MEQ TITLE MAQ exp_cadenatext:tp  TITLE MAQ par_head:n      {: RESULT = "<title> "+ tp.toString() + "title>  "+ n.toString() ; :}
-    | MEQ LINK par_link:tp MEQ DIVISION LINK MAQ par_head:n             {: RESULT = "<link "+ tp.toString() + "</link>  "+ n.toString() ; :}     
+    | MEQ LINK par_link:tp MEQ DIVISION LINK MAQ par_head:n             {:  RESULT = "<link "+ tp.toString() + "</link>  "+ n.toString() ; :}     
     | MEQ DIVISION HEAD MAQ                                             {:RESULT = " </head> "; :}
     | exp_script:tp par_head:n                                          {:RESULT = tp.toString()+" " + n.toString(); :}
     ;
@@ -159,7 +170,7 @@ par_body ::= CORIN BACKGROUND IGUAL COMILLA:tp par_color:n COMILLA:e COROUT par_
     ;
 
 
-par_link ::= CORIN REFERENCIA IGUAL COMILLA:tp exp_links:n COROUT par_link:e {:RESULT = " href=" +tp.getLexema() + n.toString() + " " + e.toString(); :}
+par_link ::= CORIN REFERENCIA IGUAL COMILLA:tp exp_links:n COROUT par_link:e {: linkRedirigir = "\"" + n.toString(); RESULT = " href=" +tp.getLexema() + n.toString() + " " + e.toString(); :}
     | MAQ:tp                                                                 {:RESULT = tp.getLexema() + " "; :}
     ;
 
@@ -188,12 +199,12 @@ exp_contenido ::= MEQ SPAM  parm_shisp:tp exp_cadenatext:n  SPAM MAQ exp_conteni
     | MEQ BR MAQ exp_contenido:tp                                                       {: RESULT = "\n<br> " + tp.toString(); :}
     | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ exp_contenido:e                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
     | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ exp_contenido:e                           {:  String styl = "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
-    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ exp_contenido:e                            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ exp_contenido:e                            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
     | MEQ DIV par_div:tp contenido_div:n DIV MAQ exp_contenido:e                             {:  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
     | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ exp_contenido:e                  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
-    | exp_script:tp exp_contenido:n                                                     {:RESULT = tp.toString()+" " + n.toString(); :}
-    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ  {:    RESULT = "</body> \n</html>"; :}
-    | MEQ DIVISION HTML MAQ   {:    RESULT = "</html>"; :}
+    | exp_script:tp exp_contenido:n                                                     {:RESULT = tp.toString()+" \n" + n.toString(); :}
+    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ  {:    RESULT = "\n </body> \n</html>"; :}
+    | MEQ DIVISION HTML MAQ   {:    RESULT = "\n</html>"; :}
     | error exp_contenido            {:System.out.println("error sintactico"); :}
     ;
 
@@ -204,11 +215,11 @@ contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_di
     | MEQ BR MAQ contenido_div:tp                                                      {:RESULT = "\n<br> " + tp.toString(); :}
     | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ contenido_div:e              {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
     | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ contenido_div:e                       {:  String styl =   "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
-    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ contenido_div:e                        {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ contenido_div:e                        {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
     | MEQ BUTTON par_button:tp  exp_cadenatext:n  BUTTON MAQ contenido_div:e           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
     | exp_script:tp contenido_div:n                                                    {:RESULT = tp.toString()+" " + n.toString(); :}
     | MEQ DIV par_div:tp contenido_div:n DIV MAQ contenido_div:e                             {:  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
-    | MEQ DIVISION                                                              {:RESULT = " </div>"; :}
+    | MEQ DIVISION                                                              {:RESULT = "\n </div>"; :}
     ;
 
 par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
@@ -258,7 +269,7 @@ par_areatext ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n  
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                     parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
     | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_areatext:n      {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
-    | MAQ MEQ DIVISION                                                                {:RESULT = "> </"; :}
+    | MAQ                                                                           {:RESULT = "> </"; :}
     ;
 
 parm_shisp ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n      {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :} 
@@ -300,7 +311,6 @@ parm_image ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_image:n     {
     | CORIN HEIGHT IGUAL COMILLA par_heigtwith:tp COMILLA COROUT parm_image:n   {:RESULT = "  height=\"" + tp.toString() + "\"  " + n.toString(); :}
     | MAQ:tp                                                                    {:RESULT = tp.getLexema(); :}
     ;
-
 
 exp_cadenatext ::= CADENA:tp exp_cadenatext:n           {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | ID:tp exp_cadenatext:n                            {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -352,41 +362,43 @@ par_heigtwith ::= NUMENTERO:tp ID:n     {: if(n.getLexema().equals("px")){ RESUL
                                             RESULT =  tp.getLexema() + n.getLexema(); } :}
     ;
 
-exp_script ::= MEQ SCRIPT MAQ exp_funciones:tp                                      {:RESULT = "  <script> " + tp.toString(); :}
+exp_script ::= MEQ SCRIPT MAQ exp_funciones:tp                                      {:RESULT = "\n  <script>  " + tp.toString(); :}
     ;
 
 exp_funciones ::= LOAD PARIN PAROUT CORIN instrucciones:tp exp_funciones:n          {:RESULT = " \n { \n"+ tp.toString()+" " + n.toString(); :}
-    | PROCESOS:tp PARIN:n PAROUT:e CORIN instrucciones:e1 exp_funciones:e2          {:RESULT = " function  " + tp.getLexema() + n.getLexema() + e.getLexema() + " { " + e1.toString() + e2.toString(); :}
-    | MEQ DIVISION SCRIPT MAQ                                                       {:RESULT = "  </script>"; :}
+    | PROCESOS:tp PARIN:n PAROUT:e CORIN instrucciones:e1 exp_funciones:e2          {:RESULT = " \n function  " + tp.getLexema() + n.getLexema() + e.getLexema() + " { " + e1.toString() + e2.toString(); :}
+    | MEQ DIVISION SCRIPT MAQ                                                       {:RESULT = " \n </script>"; :}
     ;
 
 instrucciones ::= exp_variables:tp instrucciones:n                        {:RESULT = tp.toString()+ " \n " + n.toString(); :}
-    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones:e2      {:RESULT = " alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +"\n " +  e2.toString(); :} 
-    | EXIT PARIN PAROUT PUNTOCOMA instrucciones:tp                        {:RESULT = "  return; " +  tp.toString(); :} 
+    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones:e2      {:RESULT = "\n alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +"\n " +  e2.toString(); :} 
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones:tp                        {:RESULT = " \n return; " +  tp.toString(); :} 
     | IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2 instrucciones:e3      {:
-                                                                                RESULT = "  if" + tp.getLexema() + n.toString() + e.getLexema() + "  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
+                                                                                RESULT = "\n  if" + tp.getLexema() + n.toString() + e.getLexema() + "  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | REPEAT PARIN:tp condiciones_repeat:n PAROUT HUNTIL PARIN limit_repeat:e PAROUT INIT LLAVEIN:e1 DOSP instrucciones_intro:e2 instrucciones:e3       {:
-                                                                                RESULT = "  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +"  "+ e2.toString()+"  "+e3.toString(); :}
+                                                                                RESULT = "\n  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +"  "+ e2.toString()+"  "+e3.toString(); :}
     | WHILE PARIN:tp condiciones:n  THENWHILE INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones:e2       {:
-                                                                                RESULT = "  while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
-    | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones:n                      {:RESULT = " var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
+                                                                                RESULT = " \n while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
+    | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones:n                      {:RESULT = "\n var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
                                                                                     "\n contenedor.innerHTML = " + tp.toString() + " " + n.toString(); :}
-    | COROUT                                                                {:RESULT = " }"; :}
+    | REDIRECT PARIN PAROUT PUNTOCOMA instrucciones:tp                       {:RESULT = "  REDIRECT(); \n" +  tp.toString(); :}
+    | COROUT                                                                {:RESULT = " \n }"; :}
     | error instrucciones                                               {:System.out.println("error sintactico"); :}
     ;
 
 instrucciones_intro ::= exp_variables:tp instrucciones_intro:n                 {:RESULT = tp.toString()+ " \n " + n.toString(); :}
-    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones_intro:e2     {:RESULT = " alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +" " +  e2.toString(); :} 
-    | EXIT PARIN PAROUT PUNTOCOMA instrucciones_intro:tp                       {:RESULT = "  return; " +  tp.toString(); :}   
+    | ALERTF PARIN:tp texto:n PAROUT:e PUNTOCOMA:e1 instrucciones_intro:e2     {:RESULT = " \n alert" + tp.getLexema() + n.toString() + e.getLexema() + e1.getLexema() +" \n" +  e2.toString(); :} 
+    | EXIT PARIN PAROUT PUNTOCOMA instrucciones_intro:tp                       {:RESULT = " \n return; " +  tp.toString(); :}   
     | IF PARIN:tp condiciones:n  THEN INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_if:e2 instrucciones_intro:e3     {:
-                                                                                RESULT = "  if" + tp.getLexema() + n.toString() + e.getLexema() + "  "+e1.toString() +"  "+ e2.toString()+"  "+e3.toString(); :}
+                                                                                RESULT = "  if" + tp.getLexema() + n.toString() + e.getLexema() + " \n "+e1.toString() +" \n "+ e2.toString()+"  "+e3.toString(); :}
     | REPEAT PARIN:tp condiciones_repeat:n PAROUT HUNTIL PARIN limit_repeat:e PAROUT INIT LLAVEIN:e1 DOSP instrucciones_intro:e2 instrucciones_intro:e3    {:
-                                                                                RESULT = "  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +"  "+ e2.toString()+"  "+e3.toString(); :}
+                                                                                RESULT = "  for" + tp.getLexema()+n.toString()+"; " + varIdFor + "<" +e.toString()+"; "+ varIdFor +"++) "+e1.getLexema() +" \n "+ e2.toString()+"  "+e3.toString(); :}
     | WHILE PARIN:tp condiciones:n  THENWHILE INIT LLAVEIN:e DOSP instrucciones_intro:e1 instrucciones_intro:e2     {:
-                                                                                RESULT = "  while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +"  "+ e2.toString()+"  "; :}
-    | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones_intro:n                {:RESULT = " var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
+                                                                                RESULT = "  while" + tp.getLexema()+n.toString()+e.getLexema()+"  "+e1.toString() +" \n "+ e2.toString()+"  "; :}
+    | INSERT PARIN par_insert:tp PUNTOCOMA instrucciones_intro:n                {:RESULT = "\n var contenedor = document.createElement('div');\n document.body.appendChild(contenedor);"+
                                                                                     "\n contenedor.innerHTML = " + tp.toString() + " " + n.toString(); :}
-    | DOSP LLAVEOUT:tp END                                                     {:RESULT = " " + tp.getLexema(); :}
+    | REDIRECT PARIN PAROUT PUNTOCOMA instrucciones_intro:tp                       {:RESULT = "  REDIRECT(); \n" +  tp.toString(); :}
+    | DOSP LLAVEOUT:tp END                                                     {:RESULT = "\n " + tp.getLexema(); :}
   //  | error instrucciones_intro                                           {:System.out.println("error sintactico"); :}
     ;
 
@@ -447,20 +459,21 @@ numeros ::= NUMENTERO:tp                    {:RESULT = tp.getLexema(); :}
     | ID:tp                                 {:RESULT = tp.getLexema(); :}
     ;
 
-exp_variables ::= ENTERO ID:tp exp_entero:n         {:RESULT = " var " + tp.getLexema() + n.toString(); :}
-    | DECIMAL ID:tp exp_decimal:n                   {:RESULT = " var " + tp.getLexema() + n.toString(); :}
-    | CHAR ID:tp exp_char:n                         {:RESULT = " var " + tp.getLexema() + n.toString(); :}
-    | STRING ID:tp exp_string:n                     {:RESULT = " var " + tp.getLexema() + n.toString(); :}
-    | BOOLEANO ID:tp exp_boolean:n                  {:RESULT = " var " + tp.getLexema() + n.toString(); :}
+exp_variables ::= ENTERO ID:tp exp_entero:n         {:RESULT = "\n var " + tp.getLexema() + n.toString(); :}
+    | DECIMAL ID:tp exp_decimal:n                   {:RESULT = "\n var " + tp.getLexema() + n.toString(); :}
+    | CHAR ID:tp exp_char:n                         {:RESULT = "\n var " + tp.getLexema() + n.toString(); :}
+    | STRING ID:tp exp_string:n                     {:RESULT = "\n var " + tp.getLexema() + n.toString(); :}
+    | BOOLEANO ID:tp exp_boolean:n                  {:RESULT = "\n var " + tp.getLexema() + n.toString(); :}
     | ENTERO GLOBAL ID:tp exp_entero:n              {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
     | DECIMAL GLOBAL ID:tp exp_decimal:n            {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
     | CHAR GLOBAL ID:tp exp_char:n                  {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
     | STRING GLOBAL ID:tp exp_string:n              {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
     | BOOLEANO GLOBAL ID:tp exp_boolean:n           {: varscriptGlobal += "\n var " + tp.getLexema()+ n.toString();  RESULT = ""; :}
-    | ID:tp exp_dir:n                               {:RESULT = tp.getLexema() + n.toString(); :}
+    | ID:tp exp_dir:n                               {:RESULT = "\n" + tp.getLexema() + n.toString(); :}
     ;
 
 exp_dir ::= IGUAL:tp dato_string:n exp_oper_id:e            {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+    | IGUAL:tp BOOLEANOS:n exp_oper_id:e                    {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
     ;
 
 exp_oper_id ::= SUMA:tp dato_string:n exp_oper_id:e         {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
@@ -518,8 +531,9 @@ exp_oper_string ::= SUMA:tp dato_string:n exp_oper_string:e     {:RESULT = tp.ge
 dato_string ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
     | CARACTER:tp                   {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
-    | COMILLA:tp text_string:n      {:RESULT = tp.getLexema() + n.toString(); :}
-    | ID:tp                         {:  RESULT = tp.getLexema(); :}
+    | COMILLA:tp text_string:n      {: String aux = n.toString();  aux = aux.replaceFirst(".$",""); aux = aux.replaceFirst(".$","");   RESULT = tp.getLexema() + aux + "\""; :}     //String str = "removea";
+		//str = str.replaceFirst(".$","");
+    | ID:tp                         {:  RESULT = " \" \" + " + tp.getLexema(); :}
     ;
 
 exp_char ::= IGUAL:tp CARACTER:n dat_char:e                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
@@ -589,6 +603,7 @@ par_insert ::= ID:tp par_insert1:n       {:   RESULT =  tp.getLexema() + n.toStr
 
 par_insert1 ::= COMA ID:tp par_insert1:n     {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
     | COMA APOSTROFO:tp texto_insert:e  par_insert1:n  {:RESULT = " + " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
+    | COMA CARACTER:tp par_insert1:n          {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
     | PAROUT                                {:RESULT = ";"; :}
     ;
 
@@ -597,17 +612,29 @@ texto_insert ::=  mensaje_texto:n            {:RESULT =  n.toString(); :}
     ;
 
 
-texto_etiqueta ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  "; :}    
-    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ         {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<select "+ styl + tp.toString()+" " + n.toString() + "select>  "; :} 
-    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ                   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  "; :}
-    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ                     {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<p "+ styl + tp.toString()+" " + n.toString() + "p>  "; :} 
+texto_etiqueta ::= MEQ SPAM parm_shisp:tp   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<spam "+ styl + tp.toString()+" "; :}    
+    | MEQ SELECTED parm_shisp:tp            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<select "+ styl + tp.toString()+" "; :} 
+    | MEQ H1 parm_shisp:tp                  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<h1 "+ styl + tp.toString()+" "; :}
+    | MEQ P parm_shisp:tp                   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<p "+ styl + tp.toString()+" "; :} 
     | MEQ BR MAQ                                                      {: RESULT = " <br> "; :}
-    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ             {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<input "+ styl + tp.toString()+" " + n.toString() + "input>  "; :}
-    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<img "+ styl + tp.toString()+" " + "</img>  "; :}
-    | MEQ TEXTAREA par_areatext:tp TEXTAREA MAQ                       {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<textarea "+ styl + tp.toString()+" " +  "textarea>  "; :}
-    | MEQ DIV par_div:tp contenido_div:n DIV MAQ                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<div "+ styl + tp.toString()+" " + n.toString() + "  "; :}
-    | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<button "+ styl + tp.toString()+" " + n.toString() + "button>  "; :}
+    | MEQ INPUT parm_input:tp               {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<input "+ styl + tp.toString()+" "; :}
+    | MEQ IMG parm_image:tp                 {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<img "+ styl + tp.toString()+" "; :}
+    | MEQ TEXTAREA par_areatext:tp          {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<textarea "+ styl + tp.toString()+" "; :}
+    | MEQ DIV par_div:tp                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<div "+ styl + tp.toString()+" "; :}
+    | MEQ BUTTON par_button:tp              {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<button "+ styl + tp.toString()+" "; :}
+    | MEQ DIVISION exp_etiquetas_fin:tp MAQ                           {: RESULT = "</" + tp.toString() + ">"; :} 
     ;
+
+exp_etiquetas_fin ::= SPAM:tp           {:  RESULT = tp.getLexema(); :}
+    | SELECTED:tp                       {:  RESULT = tp.getLexema(); :}
+    | H1:tp                             {:  RESULT = tp.getLexema(); :}
+    | P:tp                              {:  RESULT = tp.getLexema(); :}
+    | INPUT:tp                          {:  RESULT = tp.getLexema(); :}
+    | IMG:tp                            {:  RESULT = tp.getLexema(); :}
+    | TEXTAREA:tp                       {:  RESULT = tp.getLexema(); :}
+    | DIV:tp                            {:  RESULT = tp.getLexema(); :}
+    | BUTTON:tp                         {:  RESULT = tp.getLexema(); :}
+    ; 
 
 texto ::= ID:tp                {:  RESULT = tp.getLexema(); :}
     | COMILLA:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -631,7 +658,7 @@ mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " +
 
 text_string ::= CADENA:tp text_string:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | ID:tp text_string:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | NUMENTERO:tp text_string:n               {:RESULT = tp.getLexema()+"" + n.toString(); :}
+    | NUMENTERO:tp text_string:n               {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | NUMDECIMAL:tp text_string:n              {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | SUMA:tp text_string:n                    {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | RESTA:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -642,5 +669,5 @@ text_string ::= CADENA:tp text_string:n      {:RESULT = tp.getLexema()+" " + n.t
     | IGUAL:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | PARIN:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | PAROUT:tp text_string:n                  {:RESULT = tp.getLexema()+" " + n.toString(); :}
-    | COMILLA:tp                               {:RESULT = tp.getLexema(); :}
+    | COMILLA:tp                               {:RESULT = "" + tp.getLexema(); :}
     ;

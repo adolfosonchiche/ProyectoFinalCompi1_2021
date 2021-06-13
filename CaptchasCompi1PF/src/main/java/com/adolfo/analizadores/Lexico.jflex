@@ -274,6 +274,7 @@ private TablaSimbolo tablaSimbolo;
 "EXIT"				{ return symbol(EXIT, yytext());}
 "getElemenById"		{ return symbol(GETID, yytext());}
 "INSERT"			{ return symbol(INSERT, yytext());}
+"REDIRECT"			{ return symbol(REDIRECT, yytext());}
 "INIT"				{ return symbol(INIT, yytext());}
 "END"				{ return symbol(END, yytext());}
 //sentencias

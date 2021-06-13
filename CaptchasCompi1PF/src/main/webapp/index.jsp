@@ -21,9 +21,9 @@
 
         <div ALIGN="CENTER" ><h2 ALIGN="CENTER" > Compilador Captchas</h2></div>
        
-        <form >
+        <form>
             <br><label class="label">AREA DE CODIGO</label><br>
-            <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="140"
+            <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="200"
                        placeholder="escribe el codigo C_GCIC aqui..."
                        required onfocus="this.innerHTML">${datos}</textarea>
             <br><br>
@@ -63,10 +63,6 @@
         <% try {
             //if (request.getParameter("entrar") != null) {
 
-                //String codigo = request.getParameter("area");
-
-              
-                   //String datos = analizar.crearCaprcha(codigo);
 
         %>
         <br><label class="label">SALIDA</label><br>
@@ -107,7 +103,7 @@
                 </c:forEach>
             </table>
 <% 
-} catch(Exception e){}
+} catch(Exception e){ }
         %>
 
         
