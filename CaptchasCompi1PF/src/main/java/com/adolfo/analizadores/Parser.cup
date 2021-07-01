@@ -56,19 +56,25 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     public void syntax_error(Symbol st) {
        Token token = (Token) st.value;
       
-      if(token.getLexema().compareTo("id") == 0 || token.getLexema().compareTo("integer") == 0 || token.getLexema().compareTo("string") == 0 || token.getLexema().compareTo("char") == 0 || token.getLexema().compareTo("decimal") == 0 || token.getLexema().compareTo("boolean") == 0
-            || token.getLexema().compareTo("INSERT") == 0 || token.getLexema().compareTo("WHILE") == 0 || token.getLexema().compareTo("IF") == 0 || token.getLexema().compareTo("REPEAT") == 0) {
-                                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta un punto y coma ", token.getLexema(), token.getLine(), token.getColumna()));
-               System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
+        if(token.getLexema().compareTo("id") == 0 || token.getLexema().compareTo("integer") == 0 || token.getLexema().compareTo("string") == 0 
+            || token.getLexema().compareTo("char") == 0 || token.getLexema().compareTo("decimal") == 0 || token.getLexema().compareTo("boolean") == 0
+            || token.getLexema().compareTo("INSERT") == 0 || token.getLexema().compareTo("ALERT_INFO") == 0) {
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta un punto y coma o la instruccion INIT {: ", token.getLexema(), token.getLine(), token.getColumna()));
+                System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
 
-            } else {
+        } else if (token.getLexema().compareTo("ELSE") == 0 || token.getLexema().compareTo("WHILE") == 0 || token.getLexema().compareTo("IF") == 0 
+            || token.getLexema().compareTo("REPEAT") == 0 ) {
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta puntocoma o  END o INIT  ", token.getLexema(), token.getLine(), token.getColumna()));
+                System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
+
+        } else {
                 errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token. (verificar toda la linea)", token.getLexema(), token.getLine(), token.getColumna()));
              
         //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
 
-    System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
+        System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
        // errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
-            }
+        }
     }
 
     protected int error_sync_size() {
@@ -129,7 +135,7 @@ non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp
 /* Producciones siendo A el inicial*/
 start with exp_ini;
 
- exp_ini ::= MEQ HTML par_html:tp exp_head:n  {: captchaCreado += etiquetaId.scriptLinkRedirigir(linkRedirigir) + "\n<HTML  " + tp.toString() + "\n" + varscriptGlobal + "\n</script>\n"+ n.toString();
+ exp_ini ::= MEQ HTML par_html:tp exp_head:n  {: captchaCreado += etiquetaId.scriptLinkRedirigir(linkRedirigir) + etiquetaId.getFuncionEspecial() +"\n<HTML  " + tp.toString() + "\n" + varscriptGlobal + "\n</script>\n"+ n.toString();
                                                   System.out.println("vx " + captchaCreado);       :}
     | error exp_head                         {:System.out.println("error html en inicio");:}
     ;
@@ -404,16 +410,28 @@ instrucciones_intro ::= exp_variables:tp instrucciones_intro:n                 {
 
 condiciones ::= NOT:tp condiciones:n        {:RESULT = tp.getLexema()+ n.toString(); :}
     | exp_condicion:tp exp_conds:n          {:RESULT = tp.toString()+" " + n.toString(); :}
+    //| PARIN:tp exp_condicion:n exp_conds:e exp_conds:e1     {:RESULT = tp.getLexema() + n.toString() + e.toString() + e1.toString(); :}
     ;
 
 exp_conds ::=  signo_condicion:tp exp_condicion:n oper_cond:e   {:RESULT = tp.toString() +" "+ n.toString() + " " + e.toString(); :}
     |  oper_cond:tp                                         {:RESULT = tp.toString(); :}     
     ;
 
-exp_condicion ::= BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}      
+/*exp_condicion ::= BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}      
     | limit_repeat:tp                       {:RESULT = tp.toString(); :}
     | COMILLA:tp ID:n COMILLA:e             {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
     | COMILLA:tp CADENA:n COMILLA:e         {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
+    ;*/
+
+exp_condicion ::= numeros:tp SUMA:n exp_condicion:e           {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp RESTA:n exp_condicion:e                     {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp PRODUCTO:n exp_condicion:e                  {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp DIVISION:n exp_condicion:e                  {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | PARIN:tp exp_condicion:n exp_conds:e /*exp_conds:e1 expr_numerica:e2  */   {:RESULT = tp.getLexema() + n.toString() + e.toString(); /*+ e1.toString() + e2.toString();*/ :}
+    | numeros:tp                                            {:RESULT = tp.toString(); :}
+    | COMILLA:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
+   // | COMILLA:tp CADENA:n COMILLA:e         {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
+    | BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}  
     ;
 
 oper_cond ::= AND:tp AND:n condiciones:e    {:RESULT = tp.getLexema() + n.getLexema() + " " + e.toString(); :}
@@ -483,18 +501,20 @@ exp_oper_id ::= SUMA:tp dato_string:n exp_oper_id:e         {:RESULT = tp.getLex
     | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
 
-exp_boolean ::= IGUAL:tp dat_boolean:n exp_oper_bool:e      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+exp_boolean ::= IGUAL:tp exp_condicion:n exp_oper_bool:e      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
     | COMA:tp ID:n exp_boolean:e                            {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
     | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
 
-dat_boolean ::= BOOLEANOS:tp            {:  if(tp.getLexema().equals("true")) { RESULT = tp.getLexema();
+/*dat_boolean ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
+    | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = tp.getLexema();
                                        } else if(tp.getLexema().equals("false")) { RESULT = tp.getLexema(); } else {
                                          errorSemantico.add(String.format("Error sintactico con el lexema: %s  linea: %d  columna: %d. se esperaba true o false", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
-                                        }  :} 
-    | ID:tp                             {:  RESULT = tp.getLexema(); :}
-    ;
+                                        }  :}
+    | PARIN:tp limit_repeat:n PAROUT:e      {:RESULT = tp.getLexema() + n.toString() + e.getLexema();  :}
+    | ID:tp                          {:   RESULT = tp.getLexema(); :}
+    ;*/
 
 exp_oper_bool ::= OR:tp dat_boolean:n exp_oper_bool:e           {:RESULT = tp.getLexema() + n.toString() + " " + e.toString(); :}
     | OR:tp OR:n dat_boolean:e exp_oper_bool:e1                 {:RESULT = tp.getLexema() + n.getLexema() + " " + e.toString() + e1.toString(); :}
@@ -522,8 +542,8 @@ par_function_esp ::= ID:tp              {: RESULT = tp.getLexema(); :}
     | COMILLA:tp text_string:n          {:RESULT = tp.getLexema()+" " + n.toString(); :}
     ;
 
-exp_oper_string ::= SUMA:tp dato_string:n exp_oper_string:e     {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
-    | COMA:tp ID:n exp_string:e                                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
+exp_oper_string ::= SUMA:tp dato_string:n exp_oper_string:e     {:RESULT = tp.getLexema() + "  \"  \"  + " + n.toString() + e.toString(); :}
+    | COMA:tp ID:n exp_string:e                                 {:RESULT = tp.getLexema() + "  " + n.getLexema() + e.toString(); :}
     | PUNTOCOMA:tp                                              {:RESULT = tp.getLexema(); :}
     ;
 
@@ -533,7 +553,7 @@ dato_string ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
     | COMILLA:tp text_string:n      {: String aux = n.toString();  aux = aux.replaceFirst(".$",""); aux = aux.replaceFirst(".$","");   RESULT = tp.getLexema() + aux + "\""; :}     //String str = "removea";
 		//str = str.replaceFirst(".$","");
-    | ID:tp                         {:  RESULT = " \" \" + " + tp.getLexema(); :}
+    | ID:tp                         {:  RESULT =  tp.getLexema(); :}
     ;
 
 exp_char ::= IGUAL:tp CARACTER:n dat_char:e                 {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}

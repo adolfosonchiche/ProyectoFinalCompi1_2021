@@ -93,11 +93,11 @@ private TablaSimbolo tablaSimbolo;
               if(!etiquetaId.existeId(lexeme,listIdEtiqueta)){
                   listIdEtiqueta.add(lexeme);
               } else {
-                errorList.add(String.format("Error semantico, con el la una etiqueta su id: %s  linea %d,  .  ya esta declarado en otra etiquea\n", lexeme, yyline));
+                //errorList.add(String.format("Error semantico, con el la una etiqueta su id: %s  linea %d,  .  ya esta declarado en otra etiquea\n", lexeme, yyline));
               }
 
          } else if(idInt || idBoolean || idDouble || idChar || idString){
-         if(!etiquetaId.existeId(lexeme,listIdVar)) {
+         //if(!etiquetaId.existeId(lexeme,listIdVar)) {
             listIdVar.add(lexeme);
           if(idInt){ 
             if(idglobal){
@@ -135,8 +135,11 @@ private TablaSimbolo tablaSimbolo;
                 listTablaSimbol.add(new LexemeId(lexeme, "booleano", "local", "0", "0" ));
              }   
           }
+          if(!etiquetaId.existeId(lexeme,listIdVar)) {
+            System.out.println("la variable no existe, se puede utilizar");
          } else {
-             errorList.add(String.format("Error semantico, con el id: %s  linea %d,  .  ya esta declarado\n", lexeme, yyline));
+             //errorList.add(String.format("Error semantico, con el id: %s  linea %d,  .  ya esta declarado\n", lexeme, yyline));
+             System.out.println(String.format("Error semantico, con el id: %s  linea %d,  .  ya esta declarado\n", lexeme, yyline));
          }
         }
 

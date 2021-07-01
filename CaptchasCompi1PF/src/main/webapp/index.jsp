@@ -16,11 +16,11 @@
         <title>compi_1</title>
     </head>
     <body bgcolor="#A5F4EF">
- <% 
+        <%
         %>
 
         <div ALIGN="CENTER" ><h2 ALIGN="CENTER" > Compilador Captchas</h2></div>
-       
+
         <form>
             <br><label class="label">AREA DE CODIGO</label><br>
             <textarea  class="example-full-width2"  id="area"  name="area" rows="20" cols="200"
@@ -30,7 +30,7 @@
 
             <table border="4" width="600">
                 <tr>
-                    <td><button class="button-row" value="compilar" name="entrar" type="submit" >Compilar</button> </td>
+                    <td><button class="button-row" value="compilar" name="compilar" type="submit" >Compilar</button> </td>
                     <td><input class="file" type="file" id="file" name = "file" ></td>
                 </tr>
             </table>
@@ -61,12 +61,12 @@
         </form>
 
         <% try {
-            //if (request.getParameter("entrar") != null) {
+                //if (request.getParameter("entrar") != null) {
 
 
         %>
         <br><label class="label">SALIDA</label><br>
-        <textarea class="example-full-width" name="textarea" rows="20" cols="140" readonly>${resultado}</textarea><br>
+        <textarea class="example-full-width" name="textarea" rows="20" cols="170" readonly>${resultado}</textarea><br>
         <% //}%>
         <%@ include file = "menu.jsp" %>
 
@@ -102,12 +102,13 @@
                     </tr>
                 </c:forEach>
             </table>
-<% 
-} catch(Exception e){ }
-        %>
+            <% 
+                } catch (Exception e) {
+                }
+            %>
 
-        
-        
-        
+
+
+
     </body>
 </html>

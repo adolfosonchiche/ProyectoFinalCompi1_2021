@@ -30,7 +30,8 @@ public class ControladorPrincipal extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            if (request.getParameter("entrar") != null) {
+            if (request.getParameter("compilar") != null) {
+               // this.resultado = "";
                 String codigo = request.getParameter("area");
                 request.setAttribute("datos", codigo);
 
@@ -49,7 +50,7 @@ public class ControladorPrincipal extends HttpServlet {
                 }
                 try {
                     
-                    if ( pa.getErrorSintactico().size() > 0) {
+                    if ( pa.getErrorSintactico().size() > 0 || lexico.getErrorList().size() > 0) {
                         this.resultado = "Se encontraron errores: \n";
                         for (int i = 0; i < lexico.getErrorList().size(); i++) {
                             resultado += lexico.getErrorList().get(i) + "\n";
@@ -64,22 +65,23 @@ public class ControladorPrincipal extends HttpServlet {
 
                         System.out.println("ERRORES ");
                     } else {
-                        for (int i = 0; i < pa.getErroSemantico().size(); i++) {
+                        /*for (int i = 0; i < pa.getErroSemantico().size(); i++) {
                             resultado += pa.getErroSemantico().get(i) + "\n";
-                        }
+                        }*/
                         String idCpa = "";
-                        this.resultado += "\nEl captcha se creo correctamente, ahora ya puede utilizarlo!!! ";
+                        //this.resultado = "\nEl captcha se creo correctamente, ahora ya puede utilizarlo!!! ";
                         if (pa.getIdCaptcha().equals("")) {
                             idCpa = "nuevoCaptch" + num;
                         } else {
                             idCpa = pa.getIdCaptcha();
                         }
-                       // String direcclink = etiqueta.scriptLinkRedirigir(pa.getLinkRedirigir());
                         this.captchaNuevo = pa.getCaptchaCreado() + "\n " ;
                         this.form.saveChangedFileCaptchasId(idCpa);
                        // System.out.println(" \n" + this.captchaNuevo);
                         this.form.saveChangedFileCaptchas(this.captchaNuevo, idCpa);
                         request.setAttribute("listVar", lexico.getListTablaSimbol());
+                        this.resultado = "\nEl captcha se creo correctamente,"
+                                + " \ncon el nombre: "+ idCpa + "  ahora ya puede utilizarlo!!! ";                        
 
                     }
 
