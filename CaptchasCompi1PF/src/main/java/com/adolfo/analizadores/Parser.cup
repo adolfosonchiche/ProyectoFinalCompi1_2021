@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.ArrayList;
 import com.adolfo.analizadores.Token;
 import com.adolfo.analizadores.datos.LexemeId;
-import com.adolfo.analizadores.datos.EtiquetaId;
+import com.adolfo.analizadores.datos.EtiquetaId; 
+import com.adolfo.analizadores.datos.Estilo; 
 import com.adolfo.analizadores.datos.TablaSimbolo;
 
  parser code {:
@@ -21,9 +22,10 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
     private List<LexemeId> ListTablaSimbol;
     private EtiquetaId etiquetaId;
     private TablaSimbolo tablaSimbolo;
-    private String parInput = "style=\"";
+    private Estilo estilo;
+    /*private String parInput = "style=\"";
     private String parShipsp = "style=\"";
-    private String parDiv = "style=\"";
+    private String parDiv = "style=\"";*/
     private int parId = 0, parName = 0;
     int asd;
 
@@ -37,7 +39,7 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
         this.ListTablaSimbol = new ArrayList();
         this.etiquetaId = new EtiquetaId();
         this.tablaSimbolo = new TablaSimbolo();
-      
+        this.estilo = new Estilo("black", "black", "", "Arial", "center");
     }
 
 
@@ -58,13 +60,13 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
       
         if(token.getLexema().compareTo("id") == 0 || token.getLexema().compareTo("integer") == 0 || token.getLexema().compareTo("string") == 0 
             || token.getLexema().compareTo("char") == 0 || token.getLexema().compareTo("decimal") == 0 || token.getLexema().compareTo("boolean") == 0
-            || token.getLexema().compareTo("INSERT") == 0 || token.getLexema().compareTo("ALERT_INFO") == 0) {
-                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta un punto y coma o la instruccion INIT {: ", token.getLexema(), token.getLine(), token.getColumna()));
+            || token.getLexema().compareTo("INSERT") == 0 || token.getLexema().compareTo("ALERT_INFO") == 0 || st.sym == 87) {
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta un punto-coma o la instruccion INIT {: ", token.getLexema(), token.getLine(), token.getColumna()));
                 System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
 
         } else if (token.getLexema().compareTo("ELSE") == 0 || token.getLexema().compareTo("WHILE") == 0 || token.getLexema().compareTo("IF") == 0 
-            || token.getLexema().compareTo("REPEAT") == 0 ) {
-                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta puntocoma o  END o INIT  ", token.getLexema(), token.getLine(), token.getColumna()));
+            || token.getLexema().compareTo("REPEAT") == 0 || token.getLexema().compareTo("]") == 0) { 
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta punto-coma o  END o INIT  ", token.getLexema(), token.getLine(), token.getColumna()));
                 System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
 
         } else {
@@ -129,7 +131,7 @@ non terminal exp_ini, par_html, exp_head, exp_name, par_head, exp_contenido, exp
             exp_opeinteger, dato_decimal, exp_oper_decimal, texto_insert, dat_char, 
             dato_string, exp_oper_string, exp_funciones_especial, par_function_esp, dat_boolean,
             exp_oper_bool, numeros, expr_numerica, signo_condicion, exp_condicion, oper_cond,
-            exp_conds, exp_dir, exp_oper_id, text_string, exp_etiquetas_fin;
+            exp_conds, exp_dir, exp_oper_id, text_string, exp_etiquetas_fin, exp_conds_boolean;
 
 
 /* Producciones siendo A el inicial*/
@@ -198,67 +200,67 @@ exp_links ::= ID:tp exp_links:n          {:RESULT = tp.getLexema() + n.toString(
     | COMILLA:tp                        {:RESULT = tp.getLexema(); :}
     ;
 
-exp_contenido ::= MEQ SPAM  parm_shisp:tp exp_cadenatext:n  SPAM MAQ exp_contenido:e     {:  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
-    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ exp_contenido:e                {:  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
-    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ exp_contenido:e                          {:  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
-    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ exp_contenido:e                            {:  String styl = parShipsp + "\"  "; parShipsp = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
-    | MEQ BR MAQ exp_contenido:tp                                                       {: RESULT = "\n<br> " + tp.toString(); :}
-    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ exp_contenido:e                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
-    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ exp_contenido:e                           {:  String styl = "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
-    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ exp_contenido:e                            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
-    | MEQ DIV par_div:tp contenido_div:n DIV MAQ exp_contenido:e                             {:  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
-    | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ exp_contenido:e                  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
-    | exp_script:tp exp_contenido:n                                                     {:RESULT = tp.toString()+" \n" + n.toString(); :}
-    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ  {:    RESULT = "\n </body> \n</html>"; :}
-    | MEQ DIVISION HTML MAQ   {:    RESULT = "\n</html>"; :}
-    | error exp_contenido            {:System.out.println("error sintactico"); :}
+exp_contenido ::= MEQ SPAM  parm_shisp:tp exp_cadenatext:n  SPAM MAQ exp_contenido:e     {:  RESULT = "\n<spam "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
+    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ exp_contenido:e            {:  RESULT = "\n<select "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
+    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ exp_contenido:e                      {:  RESULT = "\n<h1 "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
+    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ exp_contenido:e                        {:  RESULT = "\n<p "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
+    | MEQ BR MAQ exp_contenido:tp                                                        {:  RESULT = "\n<br> " + tp.toString(); :}
+    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ exp_contenido:e                {:  RESULT = "\n<input "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
+    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ exp_contenido:e                         {:  RESULT = "\n<img " + tp.toString()+" " + "</img>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ exp_contenido:e             {:  RESULT = "\n<textarea "+ estilo.getAreaText() + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ DIV par_div:tp contenido_div:n DIV MAQ exp_contenido:e                         {:  RESULT = "\n<div "+ estilo.getEstiloDiv() + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
+    | MEQ BUTTON par_button:tp  exp_cadenatext:n BUTTON MAQ exp_contenido:e              {:  RESULT = "\n<button "+ estilo.getButton() + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
+    | exp_script:tp exp_contenido:n                                                      {:  RESULT = tp.toString()+" \n" + n.toString(); :}
+    | MEQ DIVISION BODY MAQ MEQ DIVISION HTML MAQ                                        {:  RESULT = "\n </body> \n</html>"; :}
+    | MEQ DIVISION HTML MAQ                                                              {:  RESULT = "\n</html>"; :}
+    | error exp_contenido                                                                {:System.out.println("error sintactico"); :}
     ;
 
-contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_div:e    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<spam "+ styl + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
-    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ contenido_div:e          {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<select "+ styl + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
-    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ contenido_div:e                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<h1 "+ styl + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
-    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ contenido_div:e                      {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<p "+ styl + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
-    | MEQ BR MAQ contenido_div:tp                                                      {:RESULT = "\n<br> " + tp.toString(); :}
-    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ contenido_div:e              {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<input "+ styl + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
-    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ contenido_div:e                       {:  String styl =   "\"\"  "; parInput = "style=\"";   RESULT = "\n<img "+ styl + tp.toString()+" " + "</img>  " + e.toString(); :}
-    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ contenido_div:e                        {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<textarea "+ styl + tp.toString()+" " +  "textarea>  " + e.toString(); :}
-    | MEQ BUTTON par_button:tp  exp_cadenatext:n  BUTTON MAQ contenido_div:e           {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "\n<button "+ styl + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
-    | exp_script:tp contenido_div:n                                                    {:RESULT = tp.toString()+" " + n.toString(); :}
-    | MEQ DIV par_div:tp contenido_div:n DIV MAQ contenido_div:e                             {:  String styl = parDiv + "\"  "; parDiv = "style=\"";   RESULT = "\n<div "+ styl + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
-    | MEQ DIVISION                                                              {:RESULT = "\n </div>"; :}
+contenido_div ::= MEQ SPAM parm_shisp:tp exp_cadenatext:n  SPAM MAQ contenido_div:e    {:  RESULT = "\n<spam "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "spam>  " + e.toString(); :}
+    | MEQ SELECTED parm_shisp:tp exp_opciones:n  SELECTED MAQ contenido_div:e          {:  RESULT = "\n<select "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "select>  " + e.toString(); :}
+    | MEQ H1 parm_shisp:tp exp_cadenatext:n  H1 MAQ contenido_div:e                    {:  RESULT = "\n<h1 "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "h1>  " + e.toString(); :}
+    | MEQ P parm_shisp:tp exp_cadenatext:n  P MAQ contenido_div:e                      {:  RESULT = "\n<p "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "p>  " + e.toString(); :}
+    | MEQ BR MAQ contenido_div:tp                                                      {:  RESULT = "\n<br> " + tp.toString(); :}
+    | MEQ INPUT parm_input:tp exp_cadenatext:n  INPUT MAQ contenido_div:e              {:  RESULT = "\n<input "+ estilo.getEstiloShip() + tp.toString()+" " + n.toString() + "input>  " + e.toString(); :}
+    | MEQ IMG parm_image:tp MEQ DIVISION IMG MAQ contenido_div:e                       {:  RESULT = "\n<img " + tp.toString()+" " + "</img>  " + e.toString(); :}
+    | MEQ TEXTAREA par_areatext:tp MEQ DIVISION TEXTAREA MAQ contenido_div:e           {:  RESULT = "\n<textarea "+ estilo.getAreaText() + tp.toString()+" " +  "textarea>  " + e.toString(); :}
+    | MEQ BUTTON par_button:tp  exp_cadenatext:n  BUTTON MAQ contenido_div:e           {:  RESULT = "\n<button "+ estilo.getButton() + tp.toString()+" " + n.toString() + "button>  " + e.toString(); :}
+    | exp_script:tp contenido_div:n                                                    {:  RESULT = tp.toString()+" " + n.toString(); :}
+    | MEQ DIV par_div:tp contenido_div:n DIV MAQ contenido_div:e                       {:  RESULT = "\n<div "+ estilo.getEstiloDiv() + tp.toString()+" " + n.toString() + "  " + e.toString(); :}
+    | MEQ DIVISION                                                                     {:  RESULT = "\n </div>"; :}
     ;
 
 par_div ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
-    | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                     {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                    { parDiv += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
-                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parDiv += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n               {: parDiv += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+    | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                     {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justify"))
+                                                                                    { estilo.setTextAlign(tp.getLexema());   /*parDiv += " text-align: " + tp.getLexema() + "; ";*/    RESULT = "  " + n.toString(); }
+                                                                                    else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema, se esperaba un center, left, rigth o justify", tp.getLexema(), tp.getLine(), tp.getColumna())); 
+                                                                                    estilo.setTextAlign("center");    RESULT = "  " + n.toString(); } :}
+    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n               {: estilo.setColor(tp.toString());    RESULT = "  " + n.toString(); :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                     {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                    { parDiv += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { estilo.setFontFamily(tp.getLexema());    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parDiv += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_div:n           {: parDiv += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
-    | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n          {: parDiv += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
-    | CORIN CLASE IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                              {: if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
-                                                                                    { parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    estilo.setFontFamily("Arial");    RESULT = "  " + n.toString(); } :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_div:n           {: estilo.setFontZize(tp.toString());    RESULT = "  " + n.toString(); :}
+    | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_div:n          {: estilo.setBackground(tp.toString());    RESULT = "  " + n.toString(); :}
+    | CORIN CLASE IGUAL COMILLA ID:tp COMILLA COROUT par_div:n                         {: if(tp.getLexema().equals("row") || tp.getLexema().equals("column") )
+                                                                                    {  RESULT = " class= \"" + tp.getLexema() + "\"  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parDiv += " class: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
+                                                                                    RESULT = " class= \"row\"  " + n.toString(); } :}
     | MAQ:tp                                                                        {:RESULT = tp.getLexema(); :}
     ;
 
 par_button ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_button:n              {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_button:n                      {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                        { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                        { estilo.setTextAlign(tp.getLexema());    RESULT = "  " + n.toString(); }
                                                                                         else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                        parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n                {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+                                                                                        estilo.setTextAlign("center");    RESULT = "  " + n.toString(); } :}
+    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n                {: estilo.setColor(tp.toString());    RESULT = "  " + n.toString(); :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_button:n                      {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                        { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                        { estilo.setFontFamily(tp.getLexema());    RESULT = "  " + n.toString(); }
                                                                                          else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                        parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_button:n            {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
-    | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n           {: parInput += " background: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+                                                                                        estilo.setFontFamily("Arial");   RESULT = "  " + n.toString(); } :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_button:n            {: estilo.setFontZize(tp.toString());  RESULT = "  " + n.toString(); :}
+    | CORIN BACKGROUND IGUAL COMILLA par_color:tp COMILLA COROUT par_button:n           {: estilo.setBackground(tp.toString());   RESULT = "  " + n.toString(); :}
     | CORIN ONCLICK IGUAL COMILLA PROCESOS:tp PARIN PAROUT COMILLA COROUT par_button:n  {:RESULT = "  onclick=\"" + tp.getLexema() + "();\"  " + n.toString(); :}
     | MAQ:tp                                                                            {:RESULT = tp.getLexema(); :}
     ;
@@ -267,28 +269,28 @@ par_areatext ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n  
     | CORIN COLUMNA IGUAL COMILLA NUMENTERO:tp COMILLA COROUT par_areatext:n        {:RESULT = "  cols=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN FILA IGUAL COMILLA NUMENTERO:tp COMILLA COROUT par_areatext:n           {:RESULT = "  rows=\"" + tp.getLexema() + "\"  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n                {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                    { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { estilo.setTextAlign(tp.getLexema());    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
+                                                                                    estilo.setTextAlign("center");    RESULT = "  " + n.toString(); } :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT par_areatext:n                {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                    { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                    { estilo.setFontFamily(tp.getLexema());    RESULT = "  " + n.toString(); }
                                                                                     else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_areatext:n      {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+                                                                                    estilo.setFontFamily("Arial");   RESULT = "  " + n.toString(); } :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT par_areatext:n      {: estilo.setFontZize(tp.toString());   RESULT = "  " + n.toString(); :}
     | MAQ                                                                           {:RESULT = "> </"; :}
     ;
 
 parm_shisp ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n      {:RESULT = "  id=\"" + tp.getLexema() + "\"  " + n.toString(); :} 
-    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_shisp:n        {:     RESULT = "  " + n.toString(); parShipsp += " color: " + tp.toString() + "; "; :}
+    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_shisp:n        {:  estilo.setColor(tp.toString());   RESULT = "  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n              {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                {     RESULT = "  " + n.toString();  parShipsp += " text-align: " + tp.getLexema() + "; "; }
+                                                                                {  estilo.setTextAlign(tp.getLexema());   RESULT = "  " + n.toString(); }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    RESULT = "  " + n.toString(); }  parShipsp += " text-align: " + tp.getLexema() + "; ";:}
+                                                                                  estilo.setTextAlign("center");  RESULT = "  " + n.toString(); }  :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT parm_shisp:n              {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                {     RESULT = "  " + n.toString(); parShipsp += " font-family: " + tp.getLexema() + "; "; }
+                                                                                {  estilo.setFontFamily(tp.getLexema());   RESULT = "  " + n.toString(); }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                    RESULT = "  " + n.toString(); }  parShipsp += " font-family: " + tp.getLexema() + "; "; :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_shisp:n    {:    RESULT = "  " + n.toString();  parShipsp += " font-size: " + tp.toString() + "; ";  :}
+                                                                                estilo.setFontFamily("Arial");    RESULT = "  " + n.toString(); }  :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_shisp:n    {:  estilo.setFontZize(tp.toString());  RESULT = "  " + n.toString();  :}
     | MAQ:tp                                                                    {:RESULT = tp.getLexema(); :}
     ;
 
@@ -297,16 +299,16 @@ parm_input ::=  CORIN IDCM IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n      
                                                                                 { RESULT = "  type=\"" + tp.getLexema() + "\"  " + n.toString(); }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
                                                                                 RESULT = "  type=\"text\"  " + n.toString(); } :}   
-    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_input:n        {: parInput += " color: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+    | CORIN COLOR IGUAL COMILLA par_color:tp COMILLA COROUT parm_input:n        {: estilo.setColor(tp.toString());    RESULT = "  " + n.toString(); :}
     | CORIN ALINGN IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n              {: if(tp.getLexema().equalsIgnoreCase("center") || tp.getLexema().equalsIgnoreCase("left") || tp.getLexema().equalsIgnoreCase("rigth") || tp.getLexema().equals("justificar"))
-                                                                                { parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                { estilo.setTextAlign(tp.getLexema());   RESULT = "  " + n.toString(); }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                parInput += " text-align: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
+                                                                                estilo.setTextAlign("center");   RESULT = "  " + n.toString(); } :}
     | CORIN FONTFY IGUAL COMILLA ID:tp COMILLA COROUT parm_input:n              {: if(tp.getLexema().equalsIgnoreCase("courier") || tp.getLexema().equalsIgnoreCase("Arial") || tp.getLexema().equalsIgnoreCase("Geneva") || tp.getLexema().equals("sans-serif"))
-                                                                                { parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); }
+                                                                                { estilo.setFontFamily(tp.getLexema());  RESULT = "  " + n.toString(); }
                                                                                 else { errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token, se esperaba un atributo de type, text, number, etc", tp.getLexema(), tp.getLine(), tp.getColumna())); 
-                                                                                parInput += " font-family: " + tp.getLexema() + "; ";    RESULT = "  " + n.toString(); } :}
-    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_input:n    {: parInput += " font-size: " + tp.toString() + "; ";    RESULT = "  " + n.toString(); :}
+                                                                                estilo.setFontFamily("Arial");    RESULT = "  " + n.toString(); } :}
+    | CORIN FONTSZ IGUAL COMILLA par_fontsize:tp COMILLA COROUT parm_input:n    {: estilo.setFontZize(tp.toString());  RESULT = "  " + n.toString(); :}
     | MAQ:tp                                                                    {:RESULT = tp.getLexema(); :}
     ;
 
@@ -417,12 +419,6 @@ exp_conds ::=  signo_condicion:tp exp_condicion:n oper_cond:e   {:RESULT = tp.to
     |  oper_cond:tp                                         {:RESULT = tp.toString(); :}     
     ;
 
-/*exp_condicion ::= BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}      
-    | limit_repeat:tp                       {:RESULT = tp.toString(); :}
-    | COMILLA:tp ID:n COMILLA:e             {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
-    | COMILLA:tp CADENA:n COMILLA:e         {:RESULT = tp.getLexema() + n.getLexema() + e.getLexema(); :}
-    ;*/
-
 exp_condicion ::= numeros:tp SUMA:n exp_condicion:e           {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
     | numeros:tp RESTA:n exp_condicion:e                     {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
     | numeros:tp PRODUCTO:n exp_condicion:e                  {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
@@ -501,11 +497,25 @@ exp_oper_id ::= SUMA:tp dato_string:n exp_oper_id:e         {:RESULT = tp.getLex
     | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
 
-exp_boolean ::= IGUAL:tp exp_condicion:n exp_oper_bool:e      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
+exp_boolean ::= IGUAL:tp dat_boolean:n exp_conds_boolean:e      {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
     | COMA:tp ID:n exp_boolean:e                            {:RESULT = tp.getLexema() + n.getLexema() + e.toString(); :}
     | PUNTOCOMA:tp                                          {:RESULT = tp.getLexema(); :}
     ;
+    
+dat_boolean ::= numeros:tp SUMA:n dat_boolean:e           {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp RESTA:n dat_boolean:e                     {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp PRODUCTO:n dat_boolean:e                  {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | numeros:tp DIVISION:n dat_boolean:e                  {:RESULT = tp.toString() + n.getLexema() + e.toString(); :}
+    | PARIN:tp dat_boolean:n exp_conds_boolean:e   {:RESULT = tp.getLexema() + n.toString() + e.toString();/* + e2.toString();*/ :}
+    | numeros:tp                                            {:RESULT = tp.toString(); :}
+    | COMILLA:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
+    | BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}  
+    ;
 
+exp_conds_boolean ::=  signo_condicion:tp dat_boolean:n exp_oper_bool:e  {:RESULT = tp.toString() +" "+ n.toString(); :}
+    |  PUNTOCOMA:tp                                         {:RESULT = tp.getLexema(); :}     
+    |  PAROUT:tp                                         {:RESULT = tp.getLexema(); :}      
+    ;
 /*dat_boolean ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
     | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = tp.getLexema();
                                        } else if(tp.getLexema().equals("false")) { RESULT = tp.getLexema(); } else {
@@ -632,17 +642,17 @@ texto_insert ::=  mensaje_texto:n            {:RESULT =  n.toString(); :}
     ;
 
 
-texto_etiqueta ::= MEQ SPAM parm_shisp:tp   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<spam "+ styl + tp.toString()+" "; :}    
-    | MEQ SELECTED parm_shisp:tp            {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<select "+ styl + tp.toString()+" "; :} 
-    | MEQ H1 parm_shisp:tp                  {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<h1 "+ styl + tp.toString()+" "; :}
-    | MEQ P parm_shisp:tp                   {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<p "+ styl + tp.toString()+" "; :} 
-    | MEQ BR MAQ                                                      {: RESULT = " <br> "; :}
-    | MEQ INPUT parm_input:tp               {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<input "+ styl + tp.toString()+" "; :}
-    | MEQ IMG parm_image:tp                 {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<img "+ styl + tp.toString()+" "; :}
-    | MEQ TEXTAREA par_areatext:tp          {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<textarea "+ styl + tp.toString()+" "; :}
-    | MEQ DIV par_div:tp                    {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<div "+ styl + tp.toString()+" "; :}
-    | MEQ BUTTON par_button:tp              {:  String styl = parInput + "\"  "; parInput = "style=\"";   RESULT = "<button "+ styl + tp.toString()+" "; :}
-    | MEQ DIVISION exp_etiquetas_fin:tp MAQ                           {: RESULT = "</" + tp.toString() + ">"; :} 
+texto_etiqueta ::= MEQ SPAM parm_shisp:tp   {:  RESULT = "<spam "+ estilo.getEstiloShip() + tp.toString()+" "; :}    
+    | MEQ SELECTED parm_shisp:tp            {:  RESULT = "<select "+ estilo.getEstiloShip() + tp.toString()+" "; :} 
+    | MEQ H1 parm_shisp:tp                  {:  RESULT = "<h1 "+ estilo.getEstiloShip() + tp.toString()+" "; :}
+    | MEQ P parm_shisp:tp                   {:  RESULT = "<p "+ estilo.getEstiloShip() + tp.toString()+" "; :} 
+    | MEQ BR MAQ                            {:  RESULT = " <br> "; :}
+    | MEQ INPUT parm_input:tp               {:  RESULT = "<input "+ estilo.getEstiloShip() + tp.toString()+" "; :}
+    | MEQ IMG parm_image:tp                 {:  RESULT = "<img " + tp.toString()+" "; :}
+    | MEQ TEXTAREA par_areatext:tp          {:  RESULT = "<textarea "+ estilo.getAreaText() + tp.toString()+" "; :}
+    | MEQ DIV par_div:tp                    {:  RESULT = "<div "+ estilo.getEstiloDiv() + tp.toString()+" "; :}
+    | MEQ BUTTON par_button:tp              {:  RESULT = "<button "+ estilo.getButton() + tp.toString()+" "; :}
+    | MEQ DIVISION exp_etiquetas_fin:tp MAQ  {: RESULT = "</" + tp.toString() + ">"; :} 
     ;
 
 exp_etiquetas_fin ::= SPAM:tp           {:  RESULT = tp.getLexema(); :}
