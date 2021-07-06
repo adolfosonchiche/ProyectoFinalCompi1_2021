@@ -90,7 +90,7 @@
                     <th>tipo</th>
                     <th>Ambito</th>
                     <th>Proceso</th>
-                    <th>Ejecucion</th>
+                    <th>Valor</th>
                 </tr>
                 <c:forEach items="${listVar}" var="var">
                     <tr>
