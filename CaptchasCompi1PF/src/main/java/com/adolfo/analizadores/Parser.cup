@@ -13,19 +13,15 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
  parser code {:
     //declaracion de variables
     private int filaErr = 0, columnErr = 0;
-    private String datErr = "", varIdFor = "", lexErr = "", idCaptcha = "", namehtml = "", captchaCreado = "";
+    private String datErr = "", varIdFor = "", idCaptcha = "", namehtml = "", captchaCreado = "";
     private String varscriptGlobal = "<script> \n", linkRedirigir = "";
     private List<String> errorSintactico;
     private List<String> errorSemantico;
     private List<String> listIdEtiqueta;
-    private List<String> listIdVar;
     private List<LexemeId> ListTablaSimbol;
     private EtiquetaId etiquetaId;
     private TablaSimbolo tablaSimbolo;
     private Estilo estilo;
-    /*private String parInput = "style=\"";
-    private String parShipsp = "style=\"";
-    private String parDiv = "style=\"";*/
     private int parId = 0, parName = 0;
     int asd;
 
@@ -35,7 +31,6 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
         this.errorSintactico = new ArrayList();
         this.errorSemantico = new ArrayList();
         this.listIdEtiqueta = lex.getListIdEtiqueta();
-        this.listIdVar = lex.getListIdVar();
         this.ListTablaSimbol = new ArrayList();
         this.etiquetaId = new EtiquetaId();
         this.tablaSimbolo = new TablaSimbolo();
@@ -69,13 +64,17 @@ import com.adolfo.analizadores.datos.TablaSimbolo;
                 errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta punto-coma o  END o INIT  ", token.getLexema(), token.getLine(), token.getColumna()));
                 System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
 
+        }  else if (st.sym == 16 || st.sym == 9 || st.sym == 17 || st.sym == 15 || st.sym == 7 || st.sym == 18 || st.sym == 6 || st.sym == 3 || st.sym == 2
+            || st.sym == 13 || st.sym == 14 || st.sym == 11 || st.sym == 10 || st.sym == 12 || st.sym == 8 || st.sym == 5 || st.sym == 4) { 
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. es posible que falta < o se esperaba otra etiqueta  ", token.getLexema(), token.getLine(), token.getColumna()));
+                System.out.println("err: " + token.getLexema() + " no se esperaba este lexema - linea: " + token.getLine() + ", columna: " + token.getColumna() + " es posible que falta un punto y coma. ");
+
         } else {
-                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token. (verificar toda la linea)", token.getLexema(), token.getLine(), token.getColumna()));
+                errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese lexema. ()", token.getLexema(), token.getLine(), token.getColumna()));
              
         //report_error("Error Sintactico con el  Token:"+ token.getLexema()+" este no pertenece a la estructura - linea: "+token.getLine()+" - columna: "+token.getColumna() + "\n",null);
 
         System.out.println("err: " + token.getLexema() + " este no pertenece a la estructura - linea: " + token.getLine() + ", columna: " + token.getColumna());
-       // errorSintactico.add(String.format("Error Sintactico lexema: %s  linea: %d  columna: %d. no se esperaba ese token.", token.getLexema(), token.getLine(), token.getColumna()));
         }
     }
 
@@ -376,6 +375,7 @@ exp_script ::= MEQ SCRIPT MAQ exp_funciones:tp                                  
 exp_funciones ::= LOAD PARIN PAROUT CORIN instrucciones:tp exp_funciones:n          {:RESULT = " \n { \n"+ tp.toString()+" " + n.toString(); :}
     | PROCESOS:tp PARIN:n PAROUT:e CORIN instrucciones:e1 exp_funciones:e2          {:RESULT = " \n function  " + tp.getLexema() + n.getLexema() + e.getLexema() + " { " + e1.toString() + e2.toString(); :}
     | MEQ DIVISION SCRIPT MAQ                                                       {:RESULT = " \n </script>"; :}
+    | error exp_funciones
     ;
 
 instrucciones ::= exp_variables:tp instrucciones:n                        {:RESULT = tp.toString()+ " \n " + n.toString(); :}
@@ -432,7 +432,7 @@ exp_condicion ::= numeros:tp SUMA:n exp_condicion:e           {:RESULT = tp.toSt
 
 oper_cond ::= AND:tp AND:n condiciones:e    {:RESULT = tp.getLexema() + n.getLexema() + " " + e.toString(); :}
     | OR:tp OR:n condiciones:e              {:RESULT = tp.getLexema() + n.getLexema() + " " + e.toString(); :}
-    | PAROUT:tp                            {:RESULT = tp.getLexema(); :}
+    | PAROUT:tp                             {:RESULT = tp.getLexema(); :}
     ;
 
 signo_condicion ::= IGUAL:tp IGUAL:n        {:RESULT = tp.getLexema() + n.getLexema(); :}
@@ -509,7 +509,7 @@ dat_boolean ::= numeros:tp SUMA:n dat_boolean:e           {:RESULT = tp.toString
     | PARIN:tp dat_boolean:n exp_conds_boolean:e   {:RESULT = tp.getLexema() + n.toString() + e.toString();/* + e2.toString();*/ :}
     | numeros:tp                                            {:RESULT = tp.toString(); :}
     | COMILLA:tp exp_links:n              {:RESULT = tp.getLexema() + n.toString(); :}
-    | BOOLEANOS:tp              {:  RESULT = tp.getLexema(); :}  
+    | BOOLEANOS:tp                        {:  RESULT = tp.getLexema(); :}  
     ;
 
 exp_conds_boolean ::=  signo_condicion:tp dat_boolean:n exp_oper_bool:e  {:RESULT = tp.toString() +" "+ n.toString(); :}
@@ -591,14 +591,14 @@ exp_opeinteger ::= SUMA:tp dato_entero:n exp_opeinteger:e       {:RESULT = tp.ge
     ;
 
 dato_entero ::= NUMENTERO:tp        {:RESULT = tp.getLexema(); :}
-    | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = "1";
+    | BOOLEANOS:tp                  {:  if(tp.getLexema().equals("true")) { RESULT = "1";
                                        } else if(tp.getLexema().equals("false")) { RESULT = "0"; } else {
                                          errorSemantico.add(String.format("Error semantico con id: %s  linea: %d  columna: %d. no existe este id.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
                                         }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1); int asciiValue = as;  RESULT = asciiValue; :}
     | PARIN:tp limit_repeat:n PAROUT:e      {:RESULT = tp.getLexema() + n.toString() + e.getLexema();  :}
-    | ID:tp                          {:   RESULT = tp.getLexema(); :}
+    | ID:tp                                 {:   RESULT = tp.getLexema(); :}
     ;
 
 exp_decimal ::= IGUAL:tp dato_decimal:n  exp_oper_decimal:e        {:RESULT = tp.getLexema() + n.toString() + e.toString(); :}
@@ -616,25 +616,25 @@ exp_oper_decimal ::= SUMA:tp dato_decimal:n exp_oper_decimal:e     {:RESULT = tp
 
 dato_decimal ::= NUMENTERO:tp       {:RESULT = tp.getLexema(); :}
     | NUMDECIMAL:tp                 {:RESULT = tp.getLexema(); :}
-    | BOOLEANOS:tp                 {:  if(tp.getLexema().equals("true")) { RESULT = "1";
-                                       } else if(tp.getLexema().equals("false")) { RESULT = "0"; } else {
+    | BOOLEANOS:tp                  {:  if(tp.getLexema().equals("true")) { RESULT = "1";
+                                    } else if(tp.getLexema().equals("false")) { RESULT = "0"; } else {
                                          errorSemantico.add(String.format("Error sintactico no se esperaba el lexema: %s  linea: %d  columna: %d. se esperaba un true o false.", tp.getLexema(), tp.getLine(), tp.getColumna()));
                                          RESULT = tp.getLexema();
-                                        }  :}
+                                    }  :}
     | CARACTER:tp                   {: char as = tp.getLexema().charAt(1);  int asciiValue = as;  RESULT = asciiValue; :} 
     | PARIN:tp limit_repeat:n PAROUT:e      {:RESULT = tp.getLexema() + n.toString() + e.getLexema();  :}
     | ID:tp                          {:  RESULT = tp.getLexema(); :}
     ;
 
-par_insert ::= ID:tp par_insert1:n       {:   RESULT =  tp.getLexema() + n.toString(); :}
+par_insert ::= ID:tp par_insert1:n                 {:   RESULT =  tp.getLexema() + n.toString(); :}
     | APOSTROFO:tp texto_insert:e  par_insert1:n   {:RESULT = "  " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
-    | CARACTER:tp par_insert1:n                     {:   RESULT =  tp.getLexema() + n.toString(); :}
+    | CARACTER:tp par_insert1:n                    {:   RESULT =  tp.getLexema() + n.toString(); :}
     ;
 
-par_insert1 ::= COMA ID:tp par_insert1:n     {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
+par_insert1 ::= COMA ID:tp par_insert1:n               {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
     | COMA APOSTROFO:tp texto_insert:e  par_insert1:n  {:RESULT = " + " +  tp.getLexema()+" " + e.toString() + n.toString(); :}
-    | COMA CARACTER:tp par_insert1:n          {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
-    | PAROUT                                {:RESULT = ";"; :}
+    | COMA CARACTER:tp par_insert1:n                   {:  RESULT = " + " + tp.getLexema() + n.toString(); :}
+    | PAROUT                                           {:RESULT = ";"; :}
     ;
 
 texto_insert ::=  mensaje_texto:n            {:RESULT =  n.toString(); :}
@@ -666,8 +666,8 @@ exp_etiquetas_fin ::= SPAM:tp           {:  RESULT = tp.getLexema(); :}
     | BUTTON:tp                         {:  RESULT = tp.getLexema(); :}
     ; 
 
-texto ::= ID:tp                {:  RESULT = tp.getLexema(); :}
-    | COMILLA:tp text_string:n                   {:RESULT = tp.getLexema()+" " + n.toString(); :}
+texto ::= ID:tp                          {:  RESULT = tp.getLexema(); :}
+    | COMILLA:tp text_string:n           {:RESULT = tp.getLexema()+" " + n.toString(); :}
     ;
 
 mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
@@ -686,7 +686,7 @@ mensaje_texto ::= CADENA:tp mensaje_texto:n      {:RESULT = tp.getLexema()+" " +
     | APOSTROFO:tp                               {:RESULT = tp.getLexema(); :}
     ;
 
-text_string ::= CADENA:tp text_string:n      {:RESULT = tp.getLexema()+" " + n.toString(); :}
+text_string ::= CADENA:tp text_string:n        {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | ID:tp text_string:n                      {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | NUMENTERO:tp text_string:n               {:RESULT = tp.getLexema()+" " + n.toString(); :}
     | NUMDECIMAL:tp text_string:n              {:RESULT = tp.getLexema()+" " + n.toString(); :}
